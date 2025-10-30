@@ -1,0 +1,12 @@
+# Exclude everything by default
+*
+
+# But include these specific files
+!.gitignore
+!app.py
+!README.md
+
+# Make sure we don't track any directories
+**/__pycache__/
+**/.venv/
+**/.history/
