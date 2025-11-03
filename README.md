@@ -25,9 +25,8 @@ streamlit run app.py
 
 (if you have streamlit skip venv)
 
-i will however note this started off as a way for me to sim a stable coin pegged to gold via an algo. so some of that language is still in there but i promise you can do so much more with it.
-
 ## features 
+i will however note this started off as a way for me to sim a stable coin pegged to gold via an algo. so some of that language is still in there but i promise you can do so much more with it.
 
 **market dynamics**
 - growth and lack there of: you can control how many people flood in and how easy they are willing to panic sell
