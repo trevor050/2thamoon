@@ -966,23 +966,73 @@ def render_sidebar_guide() -> None:
     with st.sidebar:
         st.header("Quick Start")
         st.markdown(
-            "1. **Base Market Conditions** – configure users, liquidity, supply, and hype.\n"
-            "2. **Algorithm Forge** – choose objectives, enable modules, and set treasury autopilot.\n"
-            "3. **Attacker Lab** – add scripted or autonomous adversaries once the baseline looks healthy.\n"
-            "4. **Simulation** – run the scenario, read the charts, and loop back with tweaks."
+            "1. **Base Market Conditions** -- configure users, liquidity, supply, and hype.\n"
+            "2. **Algorithm Forge** -- choose objectives, enable modules, and set treasury autopilot.\n"
+            "3. **Attacker Lab** -- add scripted or autonomous adversaries once the baseline looks healthy.\n"
+            "4. **Simulation** -- run the scenario, read the charts, and loop back with tweaks."
         )
-        st.markdown(
-            "Goal: keep `Peg Deviation %` near zero while maintaining healthy treasury inventories and user growth."
-        )
-        with st.expander("Reference: key concepts", expanded=False):
+        
+        with st.expander("Beginner's Glossary", expanded=False):
             st.markdown(
-                "**Peg** – target price derived from gold backing.  \n"
-                "**NAV** – net asset value per token; your anchor.  \n"
-                "**Peg deviation** – market price minus NAV, shown as a percentage.  \n"
-                "**Treasury NAV** – cash + tokens owned by the protocol.  \n"
-                "**Liquidity depth** – capital in the order book; higher depth resists price shocks.  \n"
-                "**Autopilot** – fee skim + buyback logic that manages treasury cash automatically.  \n"
-                "**Attack modes** – scripted or AI desks that stress-test your setup."
+                "**Arbitrage** The practice of exploiting price differences between markets or trading pairs to generate risk-free profits.\n\n"
+                "**Attack Modes** Scripted or AI-controlled trading desks that attempt to profit by exploiting market conditions or testing the resilience of stability mechanisms.\n\n"
+                "**Attacker Strategy** The approach and objectives used by adversarial traders, which may include momentum trading, arbitrage, pump and dump schemes, or liquidity draining.\n\n"
+                "**Autopilot** An automated treasury management system that uses transaction fee revenue and algorithmic logic to buy back tokens and manage reserves without manual intervention.\n\n"
+                "**Baseline Scenario** A simulation run with default settings and no active interventions, used as a reference point for comparing other configurations.\n\n"
+                "**Bear Market** A period of sustained price decreases and negative sentiment, characterized by heavy selling pressure and pessimism.\n\n"
+                "**Bid-Ask Spread** The difference between the highest price buyers are willing to pay and the lowest price sellers are willing to accept.\n\n"
+                "**Bull Market** A period of sustained price increases and positive sentiment, characterized by strong buying pressure and optimism.\n\n"
+                "**Burn / Burning** The permanent removal of tokens from circulation by sending them to an unrecoverable address. Burning reduces total supply and can be used to create deflationary pressure.\n\n"
+                "**Circuit Breaker** An emergency mechanism that halts or limits trading when extreme price movements occur, designed to prevent cascading liquidations and panic selling.\n\n"
+                "**Circulating Supply** The number of tokens currently available in the market for trading. This excludes locked tokens, treasury holdings, and unvested allocations.\n\n"
+                "**Deflationary Regime** A tokenomic model where tokens are burned faster than they are created, causing the total supply to decrease over time.\n\n"
+                "**Diamond Hands** Users who hold their tokens through market volatility and refuse to sell during price drops, providing stability to the token economy.\n\n"
+                "**Drawdown** The peak-to-trough decline in token price or portfolio value, measuring the severity of losses from recent highs.\n\n"
+                "**Emission Curve** The schedule that determines how new tokens are released over time, which can be linear, exponential, decreasing, or follow other patterns.\n\n"
+                "**Flash Crash** A sudden, dramatic price drop that occurs over a very short time period, often triggered by automated trading, cascading liquidations, or coordinated attacks.\n\n"
+                "**Gas Subsidy** Protocol-provided rebates on transaction fees to incentivize desired behaviors, such as selling at the peg price or adding liquidity.\n\n"
+                "**Halving** A scheduled reduction in the rate of new token emissions, typically cutting the minting rate by 50%. This creates predictable supply constraints.\n\n"
+                "**Hard Cap** A maximum supply limit that can never be exceeded. Once this limit is reached, no new tokens can be minted.\n\n"
+                "**Hype Cycle** Fluctuations in market enthusiasm and attention, often driven by news, social media, or external events that affect user sentiment.\n\n"
+                "**Inflationary Regime** A tokenomic model where new tokens are continuously minted, increasing supply over time. This can fund development but dilutes existing holders.\n\n"
+                "**Limit Order** An order to buy or sell tokens at a specific price or better, which remains open until filled or cancelled.\n\n"
+                "**Liquidity** The availability of buy and sell orders in the market. Higher liquidity means larger trades can be executed without significantly moving the price.\n\n"
+                "**Liquidity Depth** The total capital available in the order book at various price levels. Deeper liquidity provides better resistance to price shocks and large trades.\n\n"
+                "**Liquidity Sapping** An attack strategy focused on removing liquidity from the market to make the token more volatile and easier to manipulate.\n\n"
+                "**Locked Tokens** Tokens that exist but cannot yet be traded, often due to vesting schedules or time-locked smart contracts. These will gradually unlock and enter circulation.\n\n"
+                "**Market Cap** The total market value of all circulating tokens, calculated as token price multiplied by circulating supply. This represents the overall size and valuation of the token economy.\n\n"
+                "**Market Maker** An entity that provides liquidity by continuously offering to buy and sell tokens, profiting from the bid-ask spread.\n\n"
+                "**Market Order** An order to buy or sell tokens immediately at the best available current price, regardless of slippage.\n\n"
+                "**Market Regime** The overall state of the market, which can be bullish (rising prices, high confidence), bearish (falling prices, fear), or neutral (sideways movement).\n\n"
+                "**Mint / Minting** The creation of new tokens, which increases the total supply. Minting can be used to meet demand or as part of inflationary tokenomics.\n\n"
+                "**Momentum Trading** A strategy where traders buy assets that are rising and sell assets that are falling, attempting to ride price trends for profit.\n\n"
+                "**NAV (Net Asset Value)** The net asset value per token, calculated as the total value of backing assets divided by the circulating token supply. This is your fundamental anchor that determines what each token should theoretically be worth.\n\n"
+                "**OMO (Open Market Operations)** Treasury interventions where the protocol buys or sells tokens in the open market to stabilize price and defend the peg.\n\n"
+                "**Order Book** A list of all buy and sell orders at various price levels, showing market depth and liquidity distribution.\n\n"
+                "**Paper Hands** Users who quickly sell their tokens at the first sign of trouble or price decline, contributing to increased volatility.\n\n"
+                "**Peg** The target price that a token aims to maintain, often derived from an underlying asset like gold or USD. In this simulator, the peg represents the ideal price your token should trade at based on its backing assets.\n\n"
+                "**Peg Deviation** The difference between the market price and the NAV, expressed as a percentage. A deviation of 0% means perfect stability, while larger deviations indicate the market price has disconnected from the fundamental value. Keeping this low is the primary goal.\n\n"
+                "**PnL (Profit and Loss)** The net financial result of trading activity, calculated as the difference between entry and exit values including all costs.\n\n"
+                "**Price Volatility** The degree of price variation over time. High volatility means large price swings, while low volatility indicates stable prices.\n\n"
+                "**Pump and Dump** A manipulation scheme where attackers artificially inflate the price through coordinated buying (pump), then sell their holdings at the peak for profit (dump), causing the price to crash.\n\n"
+                "**Recovery Time** The duration required for the token price to return to previous levels after a crash or significant decline.\n\n"
+                "**ROI (Return on Investment)** The percentage gain or loss on an investment, calculated as (final value - initial value) / initial value × 100%.\n\n"
+                "**Savings Rate** Interest paid to token holders who lock their tokens for specified periods, designed to reduce selling pressure and reward long-term holding.\n\n"
+                "**Slippage** The difference between the expected price of a trade and the actual execution price, caused by insufficient liquidity. Large trades in shallow markets experience high slippage.\n\n"
+                "**Stress Test** Running simulations with extreme parameters or coordinated attacks to identify weaknesses and breaking points in the system.\n\n"
+                "**Supply Schedule** The predetermined timeline for when locked tokens become available for trading, including vesting periods and unlock events.\n\n"
+                "**Tokenomics** The economic design and incentive structures governing a token, including supply mechanics, distribution, utility, and value accrual mechanisms.\n\n"
+                "**Total Supply** The sum of all tokens that exist, including circulating, locked, treasury-held, and burned tokens.\n\n"
+                "**Transaction Tax** A fee charged on every token transfer or trade, often split between burning tokens, funding the treasury, or rewarding long-term holders.\n\n"
+                "**Treasury** The protocol-controlled reserve of assets, typically containing both cash (USD or stablecoins) and tokens. The treasury is used to defend the peg by buying when prices fall and selling when prices rise.\n\n"
+                "**Treasury NAV** The total value of all assets held by the treasury, including cash reserves and the market value of treasury-owned tokens. This represents the protocol's war chest for market interventions.\n\n"
+                "**TVL (Total Value Locked)** The total value of assets locked in the protocol, including liquidity pools, staking contracts, and treasury reserves.\n\n"
+                "**User Adoption Curve** The rate at which new users join the ecosystem over time, which can follow exponential, linear, or S-curve patterns.\n\n"
+                "**User Churn** The rate at which existing users leave the ecosystem or sell their holdings, often triggered by price drops, loss of confidence, or better opportunities elsewhere.\n\n"
+                "**User Confidence** A measure of user sentiment and trust in the token, which affects holding behavior and willingness to buy during dips.\n\n"
+                "**Vesting** The gradual release of locked tokens over time according to a schedule, commonly used for team allocations, investor tokens, and rewards.\n\n"
+                "**Whale** A large holder who possesses enough tokens or capital to significantly influence market prices through their trading activity.\n\n"
+                "**Whale Attack** Coordinated actions by large holders to manipulate price, often involving sudden large buys or sells designed to trigger panic or trigger stop losses."
             )
         with st.expander("Reference: workflow tips", expanded=False):
             st.markdown(
@@ -1076,7 +1126,7 @@ def render_help_expander() -> None:
         st.markdown("### Still Confused?")
         st.markdown(
             "**Start here:**\n"
-            "1. Click the **📖 Beginner's Glossary** in the sidebar to learn the terms\n"
+            "1. Click the **Beginner's Glossary** in the sidebar to learn the terms\n"
             "2. Go to Simulation tab and just hit 'Run simulation' with all defaults\n"
             "3. Look at the Peg Deviation chart—is it stable or wild?\n"
             "4. Go to Base Market Conditions and change ONE thing (like user growth)\n"
@@ -5489,7 +5539,7 @@ def render_algorithm_tab(sim: SimulationConfig, policy: PolicySettings) -> Tuple
                 step=0.1,
                 help=(
                     "Heavier weight = the peg objective outranks other goals when signals conflict. "
-                    "Use 1.5–2.0 when defending under heavy sell pressure."
+                    "Use 1.5--2.0 when defending under heavy sell pressure."
                 ),
             )
             peg_horizon = st.slider(
