@@ -102,4 +102,5 @@ there is so much to add and there is for sure stuff that is inaccurate. this is 
 
 ## legal and contributing
 mit license; idgaf what you do with this
+
 in terms of prs if you decide to submit one i will read it and i will probably merge it provided it isnt like insanely buggy or something
