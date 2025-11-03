@@ -68,6 +68,228 @@ class MarketRegimeSettings:
 
 
 @dataclass
+class ExternalWorldSettings:
+    value_investor_share: float = 0.24
+    momentum_trader_share: float = 0.18
+    contrarian_share: float = 0.14
+    passive_holder_share: float = 0.26
+    panic_trader_share: float = 0.18
+    share_noise: float = 0.05
+    value_intensity: float = 1.25
+    momentum_intensity: float = 1.05
+    contrarian_intensity: float = 0.9
+    panic_intensity: float = 1.15
+    passive_adjust_speed: float = 0.42
+    panic_drawdown_threshold: float = 0.06
+    contrarian_threshold: float = 0.035
+    sentiment_divergence: float = 0.3
+    scarcity_elasticity: float = 1.35
+    dilution_drag_strength: float = 0.4
+    subsidy_hold_boost: float = 0.45
+    heterogeneity_noise: float = 0.22
+    macro_dispersion: float = 0.35
+    depth_sensitivity: float = 0.55
+    procyclical_bias: float = 0.35
+    liquidity_satiation: float = 1.2
+
+
+@dataclass
+class LiquiditySettings:
+    maker_token_depth_mul: float = 0.32
+    maker_cash_depth_mul: float = 0.28
+    float_depth_mul: float = 0.018
+    user_depth_confidence_weight: float = 0.6
+    flow_to_depth_weight: float = 0.45
+    reversion_speed: float = 0.38
+    vol_sensitivity: float = 1.25
+    drawdown_sensitivity: float = 0.85
+    deviation_sensitivity: float = 0.6
+    flow_pressure_sensitivity: float = 0.55
+    policy_support_weight: float = 0.4
+    scarcity_weight: float = 0.45
+    stress_decay: float = 0.82
+    stress_gain: float = 0.55
+    stress_impact: float = 0.35
+    recovery_push: float = 0.2
+    max_step_drop: float = 0.28
+    max_step_rise: float = 0.45
+    latent_depth_noise: float = 0.045
+    volatility_floor: float = 0.04
+    pressure_floor: float = 0.9
+
+
+COHORT_SEGMENT_TEMPLATES: Dict[str, List[Dict[str, Any]]] = {
+    "value": [
+        {
+            "key": "deep_value",
+            "weight": 0.35,
+            "signal_scale": 1.6,
+            "drawdown_bias": 0.9,
+            "confidence_bias": 0.25,
+            "scarcity_bias": 0.25,
+            "stress_sensitivity": 0.18,
+            "sentiment_weight": 0.45,
+            "max_leverage": 3.0,
+            "sentiment_persistence": 0.78,
+        },
+        {
+            "key": "fundamentalists",
+            "weight": 0.4,
+            "signal_scale": 1.05,
+            "momentum_bias": 0.25,
+            "confidence_bias": 0.15,
+            "scarcity_bias": 0.15,
+            "stress_sensitivity": 0.28,
+            "sentiment_weight": 0.35,
+            "max_leverage": 2.4,
+        },
+        {
+            "key": "income_seekers",
+            "weight": 0.25,
+            "signal_scale": 0.65,
+            "momentum_bias": 0.4,
+            "drawdown_bias": -0.25,
+            "confidence_bias": 0.05,
+            "stress_sensitivity": 0.32,
+            "sentiment_weight": 0.25,
+            "max_leverage": 2.0,
+        },
+    ],
+    "momentum": [
+        {
+            "key": "trend_hunters",
+            "weight": 0.5,
+            "signal_scale": 1.25,
+            "momentum_bias": 0.6,
+            "confidence_bias": 0.25,
+            "stress_sensitivity": 0.26,
+            "sentiment_weight": 0.3,
+            "max_leverage": 3.2,
+        },
+        {
+            "key": "swing_traders",
+            "weight": 0.3,
+            "signal_scale": 0.95,
+            "drawdown_bias": -0.2,
+            "momentum_bias": 0.3,
+            "confidence_bias": 0.1,
+            "stress_sensitivity": 0.35,
+            "sentiment_weight": 0.2,
+            "max_leverage": 2.5,
+        },
+        {
+            "key": "vol_arbitrage",
+            "weight": 0.2,
+            "signal_scale": 0.55,
+            "drawdown_bias": 0.1,
+            "confidence_bias": 0.12,
+            "scarcity_bias": 0.05,
+            "stress_sensitivity": 0.18,
+            "sentiment_weight": 0.25,
+            "max_leverage": 2.8,
+        },
+    ],
+    "contrarian": [
+        {
+            "key": "dip_accumulators",
+            "weight": 0.45,
+            "signal_scale": 1.45,
+            "drawdown_bias": 1.05,
+            "momentum_bias": -0.55,
+            "confidence_bias": 0.12,
+            "stress_sensitivity": 0.22,
+            "sentiment_weight": 0.4,
+            "max_leverage": 2.7,
+        },
+        {
+            "key": "range_traders",
+            "weight": 0.35,
+            "signal_scale": 0.85,
+            "drawdown_bias": 0.35,
+            "momentum_bias": -0.2,
+            "confidence_bias": 0.08,
+            "stress_sensitivity": 0.28,
+            "sentiment_weight": 0.3,
+            "max_leverage": 2.2,
+        },
+        {
+            "key": "value_crossovers",
+            "weight": 0.2,
+            "signal_scale": 0.7,
+            "scarcity_bias": 0.22,
+            "momentum_bias": -0.15,
+            "stress_sensitivity": 0.24,
+            "sentiment_weight": 0.25,
+            "max_leverage": 2.0,
+        },
+    ],
+    "passive": [
+        {
+            "key": "indexers",
+            "weight": 0.4,
+            "signal_scale": 0.35,
+            "confidence_bias": 0.45,
+            "scarcity_bias": 0.2,
+            "stress_sensitivity": 0.12,
+            "sentiment_weight": 0.2,
+        },
+        {
+            "key": "treasury_partners",
+            "weight": 0.3,
+            "signal_scale": 0.55,
+            "scarcity_bias": 0.35,
+            "confidence_bias": 0.18,
+            "stress_sensitivity": 0.22,
+            "sentiment_weight": 0.18,
+        },
+        {
+            "key": "yield_farmers",
+            "weight": 0.3,
+            "signal_scale": 0.65,
+            "momentum_bias": 0.25,
+            "confidence_bias": 0.2,
+            "stress_sensitivity": 0.36,
+            "sentiment_weight": 0.22,
+        },
+    ],
+    "panic": [
+        {
+            "key": "stop_loss_crowd",
+            "weight": 0.4,
+            "signal_scale": 1.1,
+            "drawdown_bias": -1.05,
+            "momentum_bias": -0.65,
+            "confidence_bias": -0.35,
+            "stress_sensitivity": 0.48,
+            "sentiment_weight": 0.3,
+            "max_leverage": 2.8,
+        },
+        {
+            "key": "macro_flee",
+            "weight": 0.3,
+            "signal_scale": 0.85,
+            "drawdown_bias": -0.85,
+            "macro_bias": -0.55,
+            "confidence_bias": -0.25,
+            "stress_sensitivity": 0.55,
+            "sentiment_weight": 0.25,
+            "max_leverage": 2.4,
+        },
+        {
+            "key": "nervous_holders",
+            "weight": 0.3,
+            "signal_scale": 0.65,
+            "confidence_bias": -0.4,
+            "drawdown_bias": -0.45,
+            "stress_sensitivity": 0.4,
+            "sentiment_weight": 0.22,
+            "max_leverage": 2.0,
+        },
+    ],
+}
+
+
+@dataclass
 class AlgorithmObjective:
     name: str = "Stability"
     metric: Literal["price", "peg_deviation", "growth", "volatility", "treasury_nav", "custom_index"] = "peg_deviation"
@@ -302,6 +524,8 @@ class SimulationConfig:
     hype_settings: HypeSettings = field(default_factory=HypeSettings)
     supply_plan: TokenSupplyPlan = field(default_factory=TokenSupplyPlan)
     regime_settings: MarketRegimeSettings = field(default_factory=MarketRegimeSettings)
+    external_world: ExternalWorldSettings = field(default_factory=ExternalWorldSettings)
+    liquidity_settings: LiquiditySettings = field(default_factory=LiquiditySettings)
     algorithm_settings: AlgorithmSettings = field(default_factory=AlgorithmSettings)
     random_seed: int = 1337
 
@@ -947,6 +1171,111 @@ def _coerce_regime_settings(regime_settings: Any) -> MarketRegimeSettings:
     return defaults
 
 
+def _coerce_external_world_settings(external_settings: Any) -> ExternalWorldSettings:
+    defaults = ExternalWorldSettings()
+    if isinstance(external_settings, ExternalWorldSettings):
+        for f in fields(ExternalWorldSettings):
+            if not hasattr(external_settings, f.name):
+                setattr(external_settings, f.name, getattr(defaults, f.name))
+        return external_settings
+    if isinstance(external_settings, dict):
+        payload = {f.name: external_settings.get(f.name, getattr(defaults, f.name)) for f in fields(ExternalWorldSettings)}
+        return ExternalWorldSettings(**payload)
+    return defaults
+
+
+def _coerce_liquidity_settings(liquidity_settings: Any) -> LiquiditySettings:
+    defaults = LiquiditySettings()
+    if isinstance(liquidity_settings, LiquiditySettings):
+        for f in fields(LiquiditySettings):
+            if not hasattr(liquidity_settings, f.name):
+                setattr(liquidity_settings, f.name, getattr(defaults, f.name))
+        return liquidity_settings
+    if isinstance(liquidity_settings, dict):
+        payload = {f.name: liquidity_settings.get(f.name, getattr(defaults, f.name)) for f in fields(LiquiditySettings)}
+        return LiquiditySettings(**payload)
+    return defaults
+
+
+def _oracle_forecast_signal(
+    history: List[float],
+    horizon: int,
+    mode: str = "market_cap",
+) -> Dict[str, float]:
+    """Return oracle forecast metrics derived from recent history."""
+    clean_series = [value for value in history if value and not math.isnan(value) and value > 0]
+    result = {
+        "trend_score": 0.0,
+        "risk_score": 0.0,
+        "expected_ratio": 1.0,
+        "forecast_metric": float(clean_series[-1]) if clean_series else 0.0,
+        "confidence": 0.0,
+        "supply_bias": 0.0,
+        "drawdown": 0.0,
+    }
+    if len(clean_series) < 2:
+        result["confidence"] = 0.25 if clean_series else 0.0
+        return result
+
+    series = np.array(clean_series[-max(8, horizon * 4) :], dtype=float)
+    series = np.clip(series, 1e-9, None)
+    log_series = np.log(series)
+    idx = np.arange(len(series), dtype=float)
+    horizon = max(1, int(horizon))
+    try:
+        slope, intercept = np.polyfit(idx, log_series, 1)
+    except np.linalg.LinAlgError:
+        slope = 0.0
+        intercept = log_series[-1]
+
+    look_steps = min(horizon, len(series))
+    forecast_log_change = float(slope * look_steps)
+    expected_ratio = float(np.exp(forecast_log_change))
+
+    returns = np.diff(log_series)
+    if returns.size > 0:
+        step_vol = float(np.std(returns))
+        avg_return = float(np.mean(returns))
+    else:
+        step_vol = 0.0
+        avg_return = 0.0
+    scaled_vol = step_vol * math.sqrt(max(1, horizon))
+    risk_score = float(np.tanh(max(0.0, scaled_vol - abs(avg_return)) * 2.2))
+
+    tail = series[-max(horizon * 2, 4) :]
+    peak = float(np.max(tail))
+    last = float(tail[-1])
+    drawdown = float(np.clip((peak - last) / max(peak, 1e-9), 0.0, 1.0))
+    risk_score = max(risk_score, drawdown * 0.8)
+
+    trend_strength = float(np.tanh(forecast_log_change * 1.1))
+    if mode == "token_price":
+        trend_strength *= 1.1
+    elif mode == "hybrid":
+        trend_strength *= 0.95
+
+    supply_bias = float(np.tanh((expected_ratio - 1.0) * 0.8))
+    volatility = float(
+        np.std(np.diff(series) / np.clip(series[:-1], 1e-9, None))
+    ) if len(series) > 1 else 0.0
+    base_confidence = 1.0 / (1.0 + 6.0 * volatility + 4.0 * risk_score)
+    base_confidence *= 1.0 - 0.4 * drawdown
+    base_confidence = float(np.clip(base_confidence, 0.05, 1.0))
+
+    result.update(
+        {
+            "trend_score": trend_strength,
+            "risk_score": risk_score,
+            "expected_ratio": expected_ratio,
+            "forecast_metric": float(np.exp(intercept + slope * (len(series) - 1 + horizon))),
+            "confidence": base_confidence,
+            "supply_bias": supply_bias,
+            "drawdown": drawdown,
+        }
+    )
+    return result
+
+
 def _coerce_algorithm_settings(algorithm_settings: Any) -> AlgorithmSettings:
     defaults = AlgorithmSettings()
     if isinstance(algorithm_settings, AlgorithmSettings):
@@ -1325,6 +1654,8 @@ def run_simulation(
     supply_plan = sim.supply_plan
     hype_cfg = sim.hype_settings
     regime_cfg = _coerce_regime_settings(getattr(sim, "regime_settings", None))
+    external_cfg = _coerce_external_world_settings(getattr(sim, "external_world", None))
+    liq_cfg = _coerce_liquidity_settings(getattr(sim, "liquidity_settings", None))
     algorithm_cfg = _coerce_algorithm_settings(getattr(sim, "algorithm_settings", None))
 
     capacity_baseline = max(float(sim.user_carrying_capacity), float(sim.initial_users))
@@ -1333,6 +1664,79 @@ def run_simulation(
     regime_state: str = "neutral"
     regime_timer = 0
     regime_intensity = 0.0
+    cohort_bases = {
+        "value": max(external_cfg.value_investor_share, 0.0),
+        "momentum": max(external_cfg.momentum_trader_share, 0.0),
+        "contrarian": max(external_cfg.contrarian_share, 0.0),
+        "passive": max(external_cfg.passive_holder_share, 0.0),
+        "panic": max(external_cfg.panic_trader_share, 0.0),
+    }
+    raw_shares: Dict[str, float] = {}
+    total_cohort_share = 0.0
+    for name, base_share in cohort_bases.items():
+        jitter = 1.0
+        if external_cfg.share_noise > 0:
+            jitter += rng.gauss(0.0, external_cfg.share_noise)
+        share = max(0.01, base_share * max(0.1, jitter))
+        raw_shares[name] = share
+        total_cohort_share += share
+    if total_cohort_share <= 0:
+        total_cohort_share = 1.0
+        raw_shares = {name: 0.2 for name in cohort_bases}
+    cohort_shares = {name: share / total_cohort_share for name, share in raw_shares.items()}
+    cohort_states: Dict[str, Dict[str, float]] = {
+        name: {
+            "sentiment": rng.uniform(-0.05, 0.05),
+            "shock_bias": rng.gauss(0.0, external_cfg.heterogeneity_noise),
+            "cash_buffer": rng.uniform(0.25, 0.75),
+        }
+        for name in cohort_shares
+    }
+    cohort_segments: Dict[str, List[Dict[str, Any]]] = {}
+    cohort_segment_states: Dict[str, Dict[str, float]] = {}
+    for name in cohort_shares:
+        templates = COHORT_SEGMENT_TEMPLATES.get(
+            name,
+            [
+                {
+                    "key": "core",
+                    "weight": 1.0,
+                    "signal_scale": 1.0,
+                    "stress_sensitivity": 0.3,
+                    "sentiment_weight": 0.3,
+                    "sentiment_persistence": 0.8,
+                    "max_leverage": 2.0,
+                }
+            ],
+        )
+        segment_specs: List[Dict[str, Any]] = []
+        weight_sum = 0.0
+        for tmpl in templates:
+            spec = dict(tmpl)
+            spec.setdefault("signal_scale", 1.0)
+            spec.setdefault("stress_sensitivity", 0.3)
+            spec.setdefault("sentiment_weight", 0.25)
+            spec.setdefault("sentiment_persistence", 0.8)
+            spec.setdefault("max_leverage", 2.5)
+            jitter = rng.uniform(0.85, 1.15)
+            seg_weight = max(0.01, spec.get("weight", 0.2) * jitter)
+            spec["weight"] = seg_weight
+            seg_key = f"{name}:{spec['key']}"
+            spec["segment_key"] = seg_key
+            segment_specs.append(spec)
+            weight_sum += seg_weight
+            cohort_segment_states[seg_key] = {
+                "sentiment": rng.uniform(-0.08, 0.08),
+                "shock_bias": rng.gauss(0.0, external_cfg.heterogeneity_noise),
+                "risk_tilt": rng.uniform(0.65, 1.35),
+            }
+        if weight_sum <= 0:
+            weight_sum = sum(spec["weight"] for spec in segment_specs) or 1.0
+        for spec in segment_specs:
+            spec["weight"] /= weight_sum
+        cohort_segments[name] = segment_specs
+    last_stage_multiplier = 0.0
+    recent_mint_ratio = 0.0
 
     def sample_regime_state() -> Tuple[str, int, float]:
         if not regime_cfg.enabled:
@@ -1395,6 +1799,14 @@ def run_simulation(
 
     minted_cumulative = 0.0
     burned_cumulative = 0.0
+    initial_liquidity_guess = (
+        (sim.liquidity_base + sim.liquidity_per_user * users) * (0.8 + 0.4 * confidence)
+        + free_float * liq_cfg.float_depth_mul
+        + treasury_tokens * market_price * liq_cfg.maker_token_depth_mul
+        + treasury_cash * liq_cfg.maker_cash_depth_mul
+    )
+    liquidity_depth = max(initial_liquidity_guess, sim.liquidity_base * 0.5, 50_000.0)
+    liquidity_stress = 0.0
 
     profile_bundle: List[AttackerProfile] = list(attacker_settings.profiles or [])
     if attacker_settings.auto_enabled:
@@ -1417,7 +1829,16 @@ def run_simulation(
 
     attacker_states = _build_attacker_states(profile_bundle, attacker_settings)
     attacker_base_capital = sum(profile.capital for profile in profile_bundle)
-    algorithm_state = {"circuit_cooldown": 0, "goal_progress": 0.0, "last_signal": 0.0, "algo_flow_memory": 0.0}
+    algorithm_state = {
+        "circuit_cooldown": 0,
+        "goal_progress": 0.0,
+        "last_signal": 0.0,
+        "algo_flow_memory": 0.0,
+        "treasury_flow_memory": 0.0,
+        "recent_volatility": 0.0,
+        "recent_velocity": 0.0,
+        "liquidity_stress": liquidity_stress,
+    }
     algo_modules = algorithm_cfg.modules if hasattr(algorithm_cfg, "modules") else AlgorithmModuleSettings()
 
     growth_auto_cfg = algorithm_cfg.custom_params.get("growth_autopilot", {}) if hasattr(algorithm_cfg, "custom_params") else {}
@@ -1457,8 +1878,19 @@ def run_simulation(
         algorithm_state.setdefault("growth_baseline_cash", max(initial_baseline, 1.0))
         algorithm_state.setdefault("growth_surplus_cash", 0.0)
         if growth_oracle_enabled:
-            algorithm_state.setdefault("growth_oracle_history", [])
+            algorithm_state.setdefault("growth_oracle_series", [])
             algorithm_state.setdefault("growth_oracle_bias", 0.0)
+            algorithm_state.setdefault("growth_oracle_forecast", {})
+            algorithm_state.setdefault("growth_oracle_confidence", 0.0)
+            algorithm_state.setdefault("growth_oracle_expected_ratio", 1.0)
+            algorithm_state.setdefault("growth_oracle_risk", 0.0)
+        else:
+            algorithm_state.pop("growth_oracle_series", None)
+            algorithm_state.pop("growth_oracle_bias", None)
+            algorithm_state.pop("growth_oracle_forecast", None)
+            algorithm_state.pop("growth_oracle_confidence", None)
+            algorithm_state.pop("growth_oracle_expected_ratio", None)
+            algorithm_state.pop("growth_oracle_risk", None)
     else:
         algorithm_state.pop("growth_prev_cash", None)
         algorithm_state.pop("growth_dynamic_tax_rate", None)
@@ -1467,8 +1899,12 @@ def run_simulation(
         algorithm_state.pop("growth_baseline_cash", None)
         algorithm_state.pop("growth_surplus_cash", None)
         algorithm_state.pop("growth_surplus_spend_tokens", None)
-        algorithm_state.pop("growth_oracle_history", None)
+        algorithm_state.pop("growth_oracle_series", None)
         algorithm_state.pop("growth_oracle_bias", None)
+        algorithm_state.pop("growth_oracle_forecast", None)
+        algorithm_state.pop("growth_oracle_confidence", None)
+        algorithm_state.pop("growth_oracle_expected_ratio", None)
+        algorithm_state.pop("growth_oracle_risk", None)
     crash_cfg = getattr(algorithm_cfg, "crash_defense", CrashDefenseSettings())
     crash_defense_enabled = bool(getattr(crash_cfg, "enabled", False))
     if crash_defense_enabled:
@@ -1503,6 +1939,10 @@ def run_simulation(
         prev_price = market_price
         time_years = step / sim.steps_per_year
         month = step + 1
+        prev_liquidity_depth = max(liquidity_depth, 1.0)
+        recent_volatility = float(algorithm_state.get("recent_volatility", 0.0))
+        recent_velocity = float(algorithm_state.get("recent_velocity", 0.0))
+        liquidity_stress = float(algorithm_state.get("liquidity_stress", 0.0))
 
         savings_pool *= 0.9
         growth_surplus_cash_step = 0.0
@@ -1667,19 +2107,77 @@ def run_simulation(
         sticky_gain = new_users * np.clip(0.22 + 0.35 * confidence, 0.05, 0.65)
         sticky_users = min(users, sticky_users + sticky_gain)
 
+        total_supply = max(free_float + locked_supply + treasury_tokens, epsilon)
+        scarcity_ratio = np.clip(1.0 - free_float / max(total_supply, 1.0), -0.5, 0.95)
+        scarcity_signal = math.tanh(scarcity_ratio * external_cfg.scarcity_elasticity)
+        dilution_signal = np.clip(recent_mint_ratio * external_cfg.dilution_drag_strength, 0.0, 1.6)
+        expected_subsidy = 0.0
+        if policy.module_gas_subsidy and policy.enabled and gas_subsidy_pool > 0:
+            expected_subsidy = policy.gas_subsidy_rate * max(last_stage_multiplier, 0.0)
+            expected_subsidy = float(np.clip(expected_subsidy, 0.0, 2.0))
+        subsidy_signal = expected_subsidy * external_cfg.subsidy_hold_boost
+        hold_adjust = float(np.clip(1 + 0.45 * scarcity_signal + subsidy_signal - dilution_signal, 0.35, 2.0))
         hold_share = np.clip(
-            base_hold_progress * (0.6 + 0.7 * confidence) * (0.65 + 0.4 * np.tanh(hype_index)),
+            base_hold_progress * (0.55 + 0.65 * confidence) * (0.6 + 0.45 * np.tanh(hype_index)) * hold_adjust,
             0.03,
-            0.9,
+            0.92,
         )
-        base_liquidity = (sim.liquidity_base + sim.liquidity_per_user * users + free_float * 0.012) * liquidity_multiplier
-        liquidity_depth = max(base_liquidity, 50_000.0)
+        structural_base_hint = (sim.liquidity_base + sim.liquidity_per_user * users + free_float * 0.012) * liquidity_multiplier
 
         adoption_ratio = np.clip(users / max(effective_capacity, 1.0), 0.0, 1.5)
         liquidity_capacity = max(sim.liquidity_base * 3.0, 1.0)
-        liquidity_ratio = np.clip(liquidity_depth / liquidity_capacity, 0.0, 2.5)
+        liquidity_ratio = np.clip(prev_liquidity_depth / liquidity_capacity, 0.0, 2.5)
         confidence_span = max(sim.confidence_ceiling - sim.confidence_floor, epsilon)
         confidence_progress = np.clip((confidence - sim.confidence_floor) / confidence_span, 0.0, 1.0)
+
+        for name, state in cohort_states.items():
+            sentiment_base = state.get("sentiment", 0.0)
+            sentiment_noise = rng.gauss(0.0, external_cfg.heterogeneity_noise * 0.12)
+            scarcity_bias = scarcity_signal * (0.08 if name in ("value", "passive") else 0.02)
+            confidence_bias = (confidence - 0.5) * 0.06
+            macro_bias = (macro_confidence_shift if macro_event else 0.0) * 0.4
+            updated_sentiment = sentiment_base * 0.82 + sentiment_noise + scarcity_bias + confidence_bias + macro_bias
+            state["sentiment"] = float(np.clip(updated_sentiment, -1.25, 1.25))
+            if macro_event:
+                shock_term = rng.gauss(0.0, 0.25 + external_cfg.macro_dispersion * 0.15)
+                state["shock_bias"] = float(np.clip(state.get("shock_bias", 0.0) * 0.7 + shock_term, -2.0, 2.0))
+            state["cash_buffer"] = float(
+                np.clip(
+                    state.get("cash_buffer", 0.5) * 0.9 + 0.1 * (0.5 + dilution_signal - subsidy_signal),
+                    0.1,
+                    0.9,
+                )
+            )
+            segments = cohort_segments.get(name, [])
+            if segments:
+                segment_sentiment_sum = 0.0
+                for spec in segments:
+                    seg_state = cohort_segment_states[spec["segment_key"]]
+                    persistence = spec.get("sentiment_persistence", 0.8)
+                    seg_noise = rng.gauss(0.0, external_cfg.heterogeneity_noise * 0.1)
+                    seg_state["sentiment"] = float(
+                        np.clip(
+                            seg_state.get("sentiment", 0.0) * persistence
+                            + state["sentiment"] * spec.get("cohort_coupling", 0.45)
+                            + seg_noise,
+                            -1.8,
+                            1.8,
+                        )
+                    )
+                    if macro_event:
+                        shock_term = rng.gauss(0.0, spec.get("macro_shock_scale", 0.3))
+                        seg_state["shock_bias"] = float(
+                            np.clip(seg_state.get("shock_bias", 0.0) * 0.65 + shock_term, -3.0, 3.0)
+                        )
+                    risk_target = 1.0 + scarcity_signal * spec.get("scarcity_appetite", 0.15)
+                    risk_target += (confidence - 0.5) * spec.get("confidence_appetite", 0.12)
+                    seg_state["risk_tilt"] = float(
+                        np.clip(seg_state.get("risk_tilt", 1.0) * 0.85 + risk_target * 0.15, 0.2, 2.8)
+                    )
+                    segment_sentiment_sum += spec["weight"] * seg_state["sentiment"]
+                state["sentiment"] = float(
+                    np.clip(0.55 * state["sentiment"] + 0.45 * segment_sentiment_sum, -1.5, 1.5)
+                )
 
         retail_users = max(users * (1.0 - np.clip(sim.whale_user_fraction, 0.0, 0.6)), 0.0)
         whale_users = max(users - retail_users, 0.0)
@@ -1714,6 +2212,7 @@ def run_simulation(
         event_sell_tokens = 0.0
         event_new_users = 0.0
         event_whale_capital = 0.0
+        event_liquidity_boost = 0.0
         surviving_events: List[Dict[str, Any]] = []
         for event in active_hype_events:
             if event.get("remaining", 0) <= 0:
@@ -1774,8 +2273,7 @@ def run_simulation(
 
         if event_new_users > 0:
             users = min(effective_capacity * 1.2, users + event_new_users)
-            liquidity_depth += event_new_users * sim.liquidity_per_user * 0.25
-            liquidity_depth = max(liquidity_depth, sim.liquidity_base * 0.75)
+            event_liquidity_boost += event_new_users * sim.liquidity_per_user * 0.25
             sticky_users += event_new_users * np.clip(0.18 + 0.3 * confidence, 0.05, 0.6)
             sticky_users = min(sticky_users, users)
         whale_capital += event_whale_capital
@@ -1800,19 +2298,90 @@ def run_simulation(
         fundamental_price += (target_fundamental - fundamental_price) * 0.32
         fundamental_price = float(np.clip(fundamental_price, intrinsic_floor * 0.55, nav_price * 1.05))
         target_hold_value = community_capital * hold_share
-        adjust_rate = 0.18 + 0.45 * adoption_rate
-        desired_user_tokens = target_hold_value / max(market_price, epsilon)
-        desired_user_tokens = float(np.clip(desired_user_tokens, 0.0, free_float * 0.95))
-        user_flow = (desired_user_tokens - user_tokens) * adjust_rate
-        sentiment_flow = community_capital / max(market_price, epsilon) * (confidence - 0.5) * 0.04
-        hype_flow = community_capital / max(market_price, epsilon) * np.tanh(hype_index - 0.45) * 0.03
-        noise_flow = rng.gauss(0, sim.organic_noise * max(1.0, free_float / 20_000_000.0) ** 0.25)
+        passive_target_tokens = target_hold_value / max(market_price, epsilon)
+        passive_target_tokens = float(np.clip(passive_target_tokens, 0.0, free_float * 0.98))
+        passive_gap = passive_target_tokens - user_tokens
+        passive_speed = external_cfg.passive_adjust_speed * (0.6 + 0.4 * confidence_progress)
+        passive_flow = passive_gap * passive_speed
 
-        organic_flow = user_flow + sentiment_flow + hype_flow + noise_flow
+        capital_to_tokens = lambda capital: capital / max(market_price, epsilon)
+        value_capital = community_capital * cohort_shares.get("value", 0.0)
+        momentum_capital = community_capital * cohort_shares.get("momentum", 0.0)
+        contrarian_capital = community_capital * cohort_shares.get("contrarian", 0.0)
+        panic_capital = community_capital * cohort_shares.get("panic", 0.0)
+        passive_capital = community_capital * cohort_shares.get("passive", 0.0)
+
+        def cohort_segment_flow(name: str, base_signal: float, cohort_capital: float) -> float:
+            segments = cohort_segments.get(name)
+            if not segments or cohort_capital <= 0:
+                return capital_to_tokens(cohort_capital) * base_signal
+            total_flow = 0.0
+            for spec in segments:
+                seg_state = cohort_segment_states[spec["segment_key"]]
+                seg_capital = cohort_capital * spec["weight"]
+                if seg_capital <= 0:
+                    continue
+                seg_signal = base_signal * spec.get("signal_scale", 1.0)
+                seg_signal += price_drawdown * spec.get("drawdown_bias", 0.0)
+                seg_signal += price_momentum * spec.get("momentum_bias", 0.0)
+                seg_signal += (confidence - 0.5) * spec.get("confidence_bias", 0.0)
+                seg_signal += scarcity_signal * spec.get("scarcity_bias", 0.0)
+                seg_signal += seg_state.get("sentiment", 0.0) * spec.get("sentiment_weight", 0.2)
+                seg_signal += seg_state.get("shock_bias", 0.0) * spec.get("shock_weight", 0.1)
+                seg_signal += macro_confidence_shift * spec.get("macro_bias", 0.0)
+                seg_signal = float(np.tanh(seg_signal))
+                stress_factor = max(0.2, 1 - liquidity_stress * spec.get("stress_sensitivity", 0.25))
+                risk_tilt = seg_state.get("risk_tilt", 1.0)
+                seg_flow_tokens = capital_to_tokens(seg_capital) * seg_signal * risk_tilt * stress_factor
+                leverage = spec.get("max_leverage", 2.5)
+                max_tokens = capital_to_tokens(seg_capital) * leverage
+                seg_flow_tokens = float(np.clip(seg_flow_tokens, -max_tokens, max_tokens))
+                total_flow += seg_flow_tokens
+            return total_flow
+
+        value_signal = -np.tanh(fundamental_gap * external_cfg.value_intensity) + 0.35 * scarcity_signal
+        value_signal += cohort_states["value"]["sentiment"] * 0.3
+        momentum_signal = np.tanh(price_momentum * external_cfg.momentum_intensity + deviation * external_cfg.procyclical_bias)
+        momentum_signal += cohort_states["momentum"]["sentiment"] * 0.25
+        contrarian_signal = np.tanh((price_drawdown - external_cfg.contrarian_threshold) * external_cfg.contrarian_intensity)
+        contrarian_signal -= price_momentum * 0.4
+        contrarian_signal += cohort_states["contrarian"]["sentiment"] * 0.25
+        panic_signal = -np.clip(price_drawdown - external_cfg.panic_drawdown_threshold, 0.0, 1.5) * external_cfg.panic_intensity
+        panic_signal += cohort_states["panic"]["sentiment"] * 0.2
+        if macro_event:
+            panic_signal -= np.clip(macro_penalty * external_cfg.macro_dispersion * (1 + cohort_states["panic"]["shock_bias"]), 0.0, 1.8)
+        panic_signal += np.tanh(max(0.0, price_momentum) * 0.8) * 0.1
+
+        value_flow = cohort_segment_flow("value", value_signal, value_capital)
+        momentum_flow = cohort_segment_flow("momentum", momentum_signal, momentum_capital)
+        contrarian_flow = cohort_segment_flow("contrarian", contrarian_signal, contrarian_capital)
+        panic_flow = cohort_segment_flow("panic", panic_signal, panic_capital)
+        passive_adjust_signal = (hold_share - base_hold_progress) * 0.6
+        passive_flow += cohort_segment_flow("passive", passive_adjust_signal, passive_capital)
+
+        sentiment_flow = community_capital / max(market_price, epsilon) * (confidence - 0.5) * external_cfg.sentiment_divergence
+        hype_flow = community_capital / max(market_price, epsilon) * np.tanh(hype_index - 0.45) * 0.028
+        base_noise = rng.gauss(0, sim.organic_noise * max(1.0, free_float / 20_000_000.0) ** 0.3)
+        hetero_noise = 0.0
+        for name, share in cohort_shares.items():
+            hetero_noise += rng.gauss(0.0, external_cfg.heterogeneity_noise * 0.05) * share
+        hetero_noise *= capital_to_tokens(community_capital)
+
+        organic_flow = (
+            passive_flow
+            + value_flow
+            + momentum_flow
+            + contrarian_flow
+            + panic_flow
+            + sentiment_flow
+            + hype_flow
+            + base_noise
+            + hetero_noise
+        )
         organic_flow += event_buy_tokens - event_sell_tokens
-        organic_flow += -fundamental_gap * sim.arbitrage_flow_strength * (free_float / max(market_price, epsilon) * 0.015)
+        organic_flow += -fundamental_gap * sim.arbitrage_flow_strength * (free_float / max(market_price, epsilon) * 0.02)
         if macro_flow_bias != 0.0:
-            organic_flow += macro_flow_bias * free_float * 0.01
+            organic_flow += macro_flow_bias * free_float * 0.012
         bootstrap_flow = 0.0
         bootstrap_window = max(int(sim.steps_per_year * 2.5), 1)
         if step < bootstrap_window:
@@ -1823,9 +2392,78 @@ def run_simulation(
             organic_flow += bootstrap_flow
         max_flow = max(free_float * 0.12, 5_000.0)
         organic_flow = float(np.clip(organic_flow, -max_flow, max_flow))
-        organic_flow = 0.7 * organic_flow + 0.3 * flow_memory
+        organic_flow = 0.6 * organic_flow + 0.4 * flow_memory
         flow_memory = organic_flow
         fundamental_gap = (market_price - fundamental_price) / max(fundamental_price, epsilon)
+
+        order_depth_tokens = prev_liquidity_depth / max(market_price, epsilon)
+        flow_pressure = abs(organic_flow) / max(order_depth_tokens, 1.0)
+        memory_pressure = abs(net_flow_memory) / max(order_depth_tokens, 1.0)
+        pressure_index = 0.6 * flow_pressure + 0.4 * memory_pressure
+
+        maker_component = (
+            treasury_tokens * market_price * liq_cfg.maker_token_depth_mul
+            + treasury_cash * liq_cfg.maker_cash_depth_mul
+        )
+        user_component = sim.liquidity_per_user * users * (
+            0.4 + 0.6 * confidence
+        ) * (0.6 + 0.4 * hold_share)
+        float_component = free_float * liq_cfg.float_depth_mul * (0.6 + 0.4 * hold_share)
+        flow_depth_component = (
+            (abs(value_flow) + abs(momentum_flow) + abs(contrarian_flow))
+            * max(market_price, epsilon)
+            * liq_cfg.flow_to_depth_weight
+        )
+        structural_depth = max(
+            structural_base_hint * (0.8 + 0.2 * confidence)
+            + maker_component
+            + user_component
+            + float_component
+            + flow_depth_component,
+            sim.liquidity_base * 0.35,
+        )
+
+        scarcity_factor = float(np.clip(1 + scarcity_signal * liq_cfg.scarcity_weight, 0.4, 1.8))
+        confidence_factor = 0.65 + 0.45 * confidence
+        policy_support = 1 + liq_cfg.policy_support_weight * max(last_stage_multiplier, 0.0)
+        effective_vol = max(0.0, recent_volatility - liq_cfg.volatility_floor)
+        vol_penalty = 1 / (1 + liq_cfg.vol_sensitivity * effective_vol)
+        drawdown_penalty = 1 - liq_cfg.drawdown_sensitivity * max(0.0, price_drawdown)
+        deviation_penalty = 1 - liq_cfg.deviation_sensitivity * min(abs(deviation), 0.7)
+        pressure_excess = max(0.0, pressure_index - liq_cfg.pressure_floor)
+        flow_penalty = 1 / (1 + liq_cfg.flow_pressure_sensitivity * pressure_excess)
+        risk_multiplier = float(
+            np.clip(vol_penalty * drawdown_penalty * deviation_penalty * flow_penalty, 0.25, 1.35)
+        )
+
+        desired_liquidity = structural_depth * scarcity_factor * confidence_factor * policy_support * risk_multiplier
+        if event_liquidity_boost > 0:
+            desired_liquidity += event_liquidity_boost
+        if bootstrap_flow != 0.0:
+            desired_liquidity += abs(bootstrap_flow) * max(market_price, epsilon) * liq_cfg.flow_to_depth_weight * 0.4
+        latent_noise = float(np.clip(rng.gauss(0.0, liq_cfg.latent_depth_noise), -0.3, 0.3))
+        desired_liquidity *= math.exp(latent_noise)
+
+        reversion = float(np.clip(liq_cfg.reversion_speed * (0.55 + 0.45 * confidence), 0.05, 0.85))
+        liquidity_depth = prev_liquidity_depth + (desired_liquidity - prev_liquidity_depth) * reversion
+
+        stress_input = (
+            max(0.0, price_drawdown * 3.5)
+            + pressure_excess * 0.9
+            + max(0.0, effective_vol * 10)
+        )
+        liquidity_stress = liquidity_stress * liq_cfg.stress_decay + stress_input * liq_cfg.stress_gain
+        liquidity_stress = float(np.clip(liquidity_stress, 0.0, 8.0))
+        stress_penalty = max(0.25, 1 - liquidity_stress * liq_cfg.stress_impact)
+        liquidity_depth = liquidity_depth * stress_penalty + prev_liquidity_depth * liq_cfg.recovery_push * (1 - stress_penalty)
+
+        max_drop = prev_liquidity_depth * liq_cfg.max_step_drop
+        max_rise = prev_liquidity_depth * liq_cfg.max_step_rise
+        liquidity_depth = float(np.clip(liquidity_depth, prev_liquidity_depth - max_drop, prev_liquidity_depth + max_rise))
+        liquidity_depth = max(liquidity_depth, sim.liquidity_base * 0.4, 40_000.0)
+        algorithm_state["liquidity_stress"] = liquidity_stress
+
+        liquidity_ratio = np.clip(liquidity_depth / liquidity_capacity, 0.0, 2.5)
 
         price_window.append(market_price)
         if len(price_window) > sim.steps_per_year:
@@ -1870,6 +2508,8 @@ def run_simulation(
             realized_vol = float(np.std(rel_changes))
         else:
             realized_vol = 0.0
+        algorithm_state["recent_velocity"] = float(velocity)
+        algorithm_state["recent_volatility"] = float(realized_vol)
 
         algo_metrics = {
             "price": market_price,
@@ -1987,6 +2627,9 @@ def run_simulation(
         free_float += mint_to_market
         treasury_tokens += mint_to_treasury
         minted_cumulative += minted_step
+        total_supply_post_mint = max(free_float + locked_supply + treasury_tokens, 1.0)
+        mint_ratio_step = float(np.clip(minted_step / total_supply_post_mint if total_supply_post_mint > 0 else 0.0, 0.0, 1.0))
+        recent_mint_ratio = recent_mint_ratio * 0.8 + mint_ratio_step * 0.2
 
         unlock_gate = np.clip(price_ratio_to_goal + confidence_progress * 0.35, 0.0, 1.5)
         unlock_noise = rng.uniform(1 - supply_plan.unlock_jitter, 1 + supply_plan.unlock_jitter)
@@ -2158,7 +2801,11 @@ def run_simulation(
             auto_mode = phase_counter.most_common(1)[0][0] if phase_counter else "idle"
 
         attack_flow_tokens += auto_flow_tokens
-        liquidity_depth = max(liquidity_depth * (1 - liquidity_penalty), 40_000.0)
+        if liquidity_penalty > 0:
+            penalty_scale = 1 - min(liquidity_penalty, 0.65)
+            stressed_liquidity = liquidity_depth * penalty_scale
+            floor_candidate = max(prev_liquidity_depth - prev_liquidity_depth * liq_cfg.max_step_drop, sim.liquidity_base * 0.35, 35_000.0)
+            liquidity_depth = max(stressed_liquidity, floor_candidate)
         effective_depth = liquidity_depth
         algorithm_active = algorithm_cfg.enabled or algorithm_cfg.master_switch
         algo_exec_enabled = algorithm_active or growth_auto_enabled
@@ -2220,62 +2867,44 @@ def run_simulation(
             elif growth_oracle_goal == "token_price":
                 focus_metric = market_price
             else:
-                focus_metric = 0.5 * (
-                    (market_price / max(prev_price_ref, epsilon))
-                    + (approx_cap / max(prev_cap, epsilon))
-                )
+                price_ratio = market_price / max(prev_price_ref, epsilon)
+                cap_ratio = approx_cap / max(prev_cap, epsilon)
+                focus_metric = (price_ratio + cap_ratio) * 0.5
 
             if growth_oracle_enabled and growth_oracle_accuracy > 0.0:
-                fee_candidates = (-1.0, 0.0, 1.0)
-                bias_candidates = (-0.7, 0.0, 0.9)
-                candidates: List[Dict[str, float]] = []
-                cash_pressure = (treasury_cash - baseline_cash) / max(baseline_cash, 1.0)
-                hype_space = max(0.0, 1.5 - hype_index)
-                for fee_sign in fee_candidates:
-                    fee_delta = fee_sign * growth_fee_step
-                    for bias_ratio in bias_candidates:
-                        if bias_ratio > 0 and not lever_controls.get("buy", True):
-                            continue
-                        if bias_ratio < 0 and not lever_controls.get("sell", True):
-                            continue
-                        spend_mult = 1.0 + bias_ratio * 0.4
-                        mint_delta = 0.15 * bias_ratio if lever_controls.get("mint_adjust", True) else 0.0
-                        burn_delta = 0.12 * (-bias_ratio) if lever_controls.get("burn_adjust", True) else 0.0
-                        hype_bonus = max(0.0, bias_ratio) * 0.15 if lever_controls.get("hype_boost", True) else 0.0
+                oracle_series = list(algorithm_state.get("growth_oracle_series", []))
+                oracle_series.append(float(focus_metric))
+                max_series = max(8, growth_oracle_horizon * 4)
+                if len(oracle_series) > max_series:
+                    oracle_series = oracle_series[-max_series:]
+                algorithm_state["growth_oracle_series"] = oracle_series
+                forecast = _oracle_forecast_signal(oracle_series, growth_oracle_horizon, growth_oracle_goal)
+                algorithm_state["growth_oracle_forecast"] = forecast
 
-                        momentum_term = price_momentum * (bias_ratio * 0.9 + (spend_mult - 1.0))
-                        hype_term = hype_space * max(0.0, bias_ratio) * 0.35 - max(0.0, hype_index - 1.5) * abs(fee_delta) * 4.0
-                        cash_term = -fee_delta * 95.0 * cash_pressure
-                        deviation_term = -abs(deviation) * abs(fee_delta) * 140.0
-                        burn_term = burn_delta * 40.0
-                        candidate_score = focus_metric + momentum_term + hype_term + cash_term + deviation_term + burn_term
-                        if growth_oracle_goal == "hybrid":
-                            candidate_score += (momentum_term * 0.45 + hype_term * 0.25)
-                        candidates.append(
-                            {
-                                "score": candidate_score,
-                                "fee_delta": fee_delta,
-                                "bias_ratio": bias_ratio,
-                                "spend_mult": spend_mult,
-                                "mint_delta": mint_delta,
-                                "hype_boost": hype_bonus,
-                            }
-                        )
-                if candidates:
-                    best = max(candidates, key=lambda item: item["score"])
-                    blend = growth_oracle_accuracy
-                    oracle_fee_adjust = best["fee_delta"] * blend
-                    bias_delta_raw = best["bias_ratio"] * growth_buy_push * blend
-                    if bias_delta_raw > 0 and not lever_controls.get("buy", True):
-                        bias_delta_raw = 0.0
-                    if bias_delta_raw < 0 and not lever_controls.get("sell", True):
-                        bias_delta_raw = 0.0
-                    oracle_bias_delta = bias_delta_raw
-                    oracle_spend_multiplier = 1.0 + (best["spend_mult"] - 1.0) * blend
-                    if lever_controls.get("mint_adjust", True):
-                        oracle_mint_scale = float(np.clip(1.0 + best["mint_delta"] * blend, 0.4, 1.9))
-                    if lever_controls.get("hype_boost", True):
-                        oracle_hype_boost = best["hype_boost"] * blend
+                confidence_factor = forecast["confidence"] * growth_oracle_accuracy
+                weight = growth_oracle_weight * confidence_factor
+                trend_strength = forecast["trend_score"]
+                risk_score = forecast["risk_score"]
+                supply_bias = forecast["supply_bias"]
+                if growth_oracle_goal == "hybrid":
+                    trend_strength *= 0.9
+                    risk_score *= 0.85
+                oracle_bias_delta = trend_strength * growth_buy_push * weight
+                if oracle_bias_delta > 0 and not lever_controls.get("buy", True):
+                    oracle_bias_delta = 0.0
+                if oracle_bias_delta < 0 and not lever_controls.get("sell", True):
+                    oracle_bias_delta = 0.0
+                oracle_fee_adjust = -risk_score * growth_fee_step * weight
+                spend_adjust = trend_strength * 0.55 * weight
+                oracle_spend_multiplier = float(np.clip(1.0 + spend_adjust, 0.35, 2.25))
+                if lever_controls.get("mint_adjust", True):
+                    mint_adjust = -supply_bias * 0.5 * weight
+                    oracle_mint_scale = float(np.clip(1.0 + mint_adjust, 0.45, 1.8))
+                if lever_controls.get("hype_boost", True) and trend_strength > 0:
+                    oracle_hype_boost = trend_strength * confidence_factor * 0.2
+            else:
+                algorithm_state.pop("growth_oracle_series", None)
+                algorithm_state.pop("growth_oracle_forecast", None)
 
         if growth_auto_enabled:
             baseline_cash = float(max(algorithm_state.get("growth_baseline_cash", treasury_cash), 1.0))
@@ -2289,12 +2918,11 @@ def run_simulation(
             else:
                 growth_surplus_cash_step = 0.0
             spend_fraction = np.clip(growth_surplus_spend_rate_pct / 100.0, 0.0, 1.0)
-            oracle_spend_multiplier = 1.0
+            spend_multiplier = float(np.clip(oracle_spend_multiplier, 0.2, 2.5))
             if growth_oracle_enabled:
-                oracle_spend_multiplier += np.clip(growth_oracle_bias, -1.5, 2.0) * 0.35
-                oracle_spend_multiplier = max(0.0, oracle_spend_multiplier)
-            oracle_spend_multiplier = float(np.clip(oracle_spend_multiplier, 0.2, 2.5))
-            max_spend_this_step = surplus_bucket * spend_fraction * oracle_spend_multiplier
+                spend_multiplier *= float(np.clip(1 + np.clip(growth_oracle_bias, -1.5, 2.0) * 0.15, 0.5, 2.5))
+            spend_multiplier = float(np.clip(spend_multiplier, 0.2, 3.0))
+            max_spend_this_step = surplus_bucket * spend_fraction * spend_multiplier
             # Allow spending directly from treasury cash above baseline, not just from bucket
             available_cash = max(0.0, treasury_cash - baseline_cash * 1.05)  # Keep 5% safety margin
             spend_cash = min(max_spend_this_step, available_cash)
@@ -2397,16 +3025,25 @@ def run_simulation(
                 treasury_cash -= buy_tokens * nav_price
         prev_flow_memory = float(algorithm_state.get("algo_flow_memory", 0.0))
         smoothed_flow = 0.65 * algo_flow_tokens + 0.35 * prev_flow_memory
-        max_depth_tokens = (effective_depth / max(nav_price, epsilon)) * 0.6
-        max_cash_tokens = (treasury_cash / max(market_price, epsilon)) * 0.6
-        max_flow_tokens = max(max_depth_tokens, max_cash_tokens, 1.0)
-        smoothed_flow = float(np.clip(smoothed_flow, -max_flow_tokens, max_flow_tokens))
+        depth_cap = (effective_depth / max(nav_price, epsilon)) * 0.5
+        buy_cash_cap = (treasury_cash / max(market_price, epsilon)) * 0.45
+        inventory_sell_cap = treasury_tokens * 0.35
+        liquidity_cap = max(free_float * 0.04, 1.0)
+        buy_cap = max(1.0, min(depth_cap, buy_cash_cap, liquidity_cap))
+        sell_cap = max(1.0, min(depth_cap, inventory_sell_cap + liquidity_cap * 0.5, liquidity_cap))
+        smoothed_flow = float(np.clip(smoothed_flow, -sell_cap, buy_cap))
         algorithm_state["algo_flow_memory"] = smoothed_flow
         algo_flow_tokens = smoothed_flow
+        treasury_flow_memory = float(algorithm_state.get("treasury_flow_memory", 0.0))
+        if algo_flow_tokens != 0.0 and treasury_flow_memory != 0.0:
+            if np.sign(algo_flow_tokens) * np.sign(treasury_flow_memory) < 0:
+                reversal_ratio = min(1.0, abs(treasury_flow_memory) / max(abs(algo_flow_tokens), 1e-6))
+                algo_flow_tokens *= 0.5 * (1 - 0.6 * reversal_ratio)
+        algo_flow_tokens = float(np.clip(algo_flow_tokens, -sell_cap, buy_cap))
 
         if algo_exec_enabled and abs(algo_flow_tokens) > epsilon:
             if algo_flow_tokens > 0:
-                max_tokens_to_buy = treasury_cash / max(market_price, epsilon)
+                max_tokens_to_buy = min(treasury_cash / max(market_price, epsilon), buy_cap)
                 buy_tokens = min(algo_flow_tokens, max_tokens_to_buy)
                 if buy_tokens > 0:
                     policy_flow += buy_tokens
@@ -2414,7 +3051,7 @@ def run_simulation(
                     treasury_cash -= buy_tokens * market_price
                     algo_executed = buy_tokens
             else:
-                sell_tokens = min(abs(algo_flow_tokens), treasury_tokens)
+                sell_tokens = min(abs(algo_flow_tokens), treasury_tokens, sell_cap)
                 if sell_tokens > 0:
                     policy_flow -= sell_tokens
                     treasury_tokens -= sell_tokens
@@ -2422,6 +3059,12 @@ def run_simulation(
                     free_float += sell_tokens
                     algo_executed = -sell_tokens
         algo_flow_tokens = algo_executed
+        treasury_flow_memory = float(algorithm_state.get("treasury_flow_memory", 0.0))
+        if algo_executed != 0:
+            treasury_flow_memory = treasury_flow_memory * 0.7 + algo_executed * 0.3
+        else:
+            treasury_flow_memory *= 0.85
+        algorithm_state["treasury_flow_memory"] = treasury_flow_memory
 
         if crash_defense_enabled:
             crash_active_timer = max(0, int(algorithm_state.get("crash_active_timer", 0)))
@@ -2470,6 +3113,8 @@ def run_simulation(
             crash_buy_tokens_step = 0.0
             crash_gas_spend_step = 0.0
             crash_budget_remaining = 0.0
+
+        policy_flow = float(np.clip(policy_flow, -free_float * 0.06, free_float * 0.06))
 
         if central_bank_live and policy.module_gas_subsidy and gas_subsidy_pool > 0 and abs_dev <= hard_band:
             subsidy = min(gas_subsidy_pool, policy.gas_subsidy_rate * stage_multiplier * users)
@@ -2644,7 +3289,8 @@ def run_simulation(
         noise_scale = 0.01 + sim.organic_noise * 0.5 + 0.007 * hype_index
         noise_return = rng.gauss(0.0, noise_scale)
 
-        total_log_return = flow_return + reversion_return + gold_pull + policy_pull + noise_return + momentum_return
+        scarcity_return = 0.07 * scarcity_signal
+        total_log_return = flow_return + reversion_return + gold_pull + policy_pull + noise_return + momentum_return + scarcity_return
         mispricing_ratio = abs(math.log(max(market_price, epsilon) / max(anchor_price, epsilon)))
         down_clip = -0.25 - min(0.85, mispricing_ratio * 0.5 + fundamental_mispricing * 0.35)
         up_clip = 0.2 + min(0.15, max(0.0, price_momentum) * 0.1)
@@ -2695,25 +3341,24 @@ def run_simulation(
         central_bank_active = central_bank_live
 
         if growth_auto_enabled and growth_oracle_enabled:
-            history = list(algorithm_state.get("growth_oracle_history", []))
-            goal_metric = market_cap if growth_oracle_goal == "market_cap" else market_price
-            history.append(float(goal_metric))
-            hist_cap = max(growth_oracle_horizon, 2)
-            if len(history) > hist_cap:
-                history = history[-hist_cap:]
-            if len(history) >= 2:
-                idx = np.arange(len(history), dtype=float)
-                try:
-                    slope = float(np.polyfit(idx, history, 1)[0])
-                except np.linalg.LinAlgError:
-                    slope = 0.0
-                scale = max(abs(history[-1]), 1.0)
-                normalized = slope * growth_oracle_horizon / scale
-                oracle_bias = float(np.clip(normalized, -2.5, 2.5))
+            series_snapshot = list(algorithm_state.get("growth_oracle_series", []))
+            algorithm_state["growth_oracle_series"] = series_snapshot[-max(4, growth_oracle_horizon * 4) :]
+            forecast_snapshot = dict(algorithm_state.get("growth_oracle_forecast", {}))
+            if forecast_snapshot:
+                oracle_bias = forecast_snapshot.get("trend_score", 0.0) * growth_oracle_accuracy
+                oracle_bias = float(np.clip(oracle_bias, -2.5, 2.5))
+                algorithm_state["growth_oracle_bias"] = oracle_bias
+                algorithm_state["growth_oracle_confidence"] = float(
+                    np.clip(forecast_snapshot.get("confidence", 0.0), 0.0, 1.0)
+                )
+                algorithm_state["growth_oracle_expected_ratio"] = float(
+                    np.clip(forecast_snapshot.get("expected_ratio", 1.0), 0.1, 5.0)
+                )
+                algorithm_state["growth_oracle_risk"] = float(
+                    np.clip(forecast_snapshot.get("risk_score", 0.0), 0.0, 1.5)
+                )
             else:
-                oracle_bias = float(algorithm_state.get("growth_oracle_bias", 0.0) * 0.8)
-            algorithm_state["growth_oracle_history"] = history
-            algorithm_state["growth_oracle_bias"] = oracle_bias
+                algorithm_state["growth_oracle_bias"] = float(algorithm_state.get("growth_oracle_bias", 0.0) * 0.8)
         elif growth_oracle_enabled:
             algorithm_state["growth_oracle_bias"] = float(algorithm_state.get("growth_oracle_bias", 0.0) * 0.8)
 
@@ -2756,6 +3401,7 @@ def run_simulation(
             algorithm_state.pop("oracle_hype_boost", None)
 
         growth_oracle_bias = float(algorithm_state.get("growth_oracle_bias", 0.0)) if growth_auto_enabled else 0.0
+        last_stage_multiplier = stage_multiplier
 
         df_rows.append(
             {
@@ -2768,10 +3414,24 @@ def run_simulation(
                 "peg_deviation_pct": (market_price / max(nav_price, epsilon)) - 1,
                 "users": users,
                 "liquidity_depth": liquidity_depth,
+                "liquidity_pressure": pressure_index,
+                "liquidity_structural": structural_depth,
+                "liquidity_desired": desired_liquidity,
+                "liquidity_stress_index": liquidity_stress,
                 "hold_share": hold_share,
                 "confidence": confidence,
                 "organic_flow_tokens": organic_flow,
+                "passive_flow_tokens": passive_flow,
+                "value_flow_tokens": value_flow,
+                "momentum_flow_tokens": momentum_flow,
+                "contrarian_flow_tokens": contrarian_flow,
+                "panic_flow_tokens": panic_flow,
+                "sentiment_flow_tokens": sentiment_flow,
+                "hype_flow_tokens": hype_flow,
                 "bootstrap_flow_tokens": bootstrap_flow,
+                "scarcity_ratio": scarcity_ratio,
+                "scarcity_signal": scarcity_signal,
+                "recent_mint_ratio": recent_mint_ratio,
                 "retail_capital": retail_capital,
                 "whale_capital": whale_capital,
                 "speculator_capital": speculative_capital,
@@ -2789,6 +3449,12 @@ def run_simulation(
                 "growth_cash_delta": growth_cash_delta,
                 "growth_buy_bias": growth_buy_bias,
                 "growth_oracle_bias": growth_oracle_bias if growth_auto_enabled and growth_oracle_enabled else 0.0,
+                "oracle_trend_score": float(
+                    algorithm_state.get("growth_oracle_forecast", {}).get("trend_score", 0.0)
+                ),
+                "oracle_confidence": float(algorithm_state.get("growth_oracle_confidence", 0.0)),
+                "oracle_expected_ratio": float(algorithm_state.get("growth_oracle_expected_ratio", 1.0)),
+                "oracle_risk_score": float(algorithm_state.get("growth_oracle_risk", 0.0)),
                 "growth_baseline_cash": float(algorithm_state.get("growth_baseline_cash", treasury_cash)),
                 "growth_surplus_cash_step": growth_surplus_cash_step,
                 "growth_surplus_spend_tokens_step": growth_surplus_spend_tokens_step,
@@ -2879,12 +3545,28 @@ def run_simulation(
         )
 
     timeline = pd.DataFrame(df_rows)
+    if not timeline.empty:
+        numeric_cols = timeline.select_dtypes(include=[np.number]).columns
+        if len(numeric_cols) > 0:
+            timeline[numeric_cols] = timeline[numeric_cols].replace([np.inf, -np.inf], np.nan)
+            timeline[numeric_cols] = timeline[numeric_cols].fillna(0.0)
+    else:
+        timeline = pd.DataFrame(columns=["step", "token_price"])
     attacker_summary = pd.DataFrame(trade_rows)
     if not attacker_summary.empty:
         attacker_summary["year"] = attacker_summary["step"] / sim.steps_per_year
         attacker_summary["month"] = attacker_summary["step"] + 1
         attacker_summary["tokens_abs"] = attacker_summary["tokens"].abs()
+        num_cols = attacker_summary.select_dtypes(include=[np.number]).columns
+        if len(num_cols) > 0:
+            attacker_summary[num_cols] = attacker_summary[num_cols].replace([np.inf, -np.inf], np.nan)
+            attacker_summary[num_cols] = attacker_summary[num_cols].fillna(0.0)
     attacker_state_df = pd.DataFrame(attacker_state_rows)
+    if not attacker_state_df.empty:
+        num_cols = attacker_state_df.select_dtypes(include=[np.number]).columns
+        if len(num_cols) > 0:
+            attacker_state_df[num_cols] = attacker_state_df[num_cols].replace([np.inf, -np.inf], np.nan)
+            attacker_state_df[num_cols] = attacker_state_df[num_cols].fillna(0.0)
 
     return SimulationOutput(
         timeline=timeline,
@@ -2922,6 +3604,14 @@ def render_simulation_tab(output: SimulationOutput) -> None:
     df["growth_surplus_spend_cash_step"] = df.get("growth_surplus_spend_cash_step", 0.0)
     df["growth_fee_cash_step"] = df.get("growth_fee_cash_step", 0.0)
     df["growth_oracle_bias"] = df.get("growth_oracle_bias", 0.0)
+    df["oracle_trend_score"] = df.get("oracle_trend_score", 0.0)
+    df["oracle_confidence"] = df.get("oracle_confidence", 0.0)
+    df["oracle_expected_ratio"] = df.get("oracle_expected_ratio", 1.0)
+    df["oracle_risk_score"] = df.get("oracle_risk_score", 0.0)
+    df["liquidity_pressure"] = df.get("liquidity_pressure", 0.0)
+    df["liquidity_structural"] = df.get("liquidity_structural", 0.0)
+    df["liquidity_desired"] = df.get("liquidity_desired", 0.0)
+    df["liquidity_stress_index"] = df.get("liquidity_stress_index", 0.0)
     df["absolute_supply_adjustment_step"] = df.get("absolute_supply_adjustment_step", 0.0)
     df["attacker_cash_total"] = df.get("attacker_cash_total", 0.0)
     df["attacker_tokens_total"] = df.get("attacker_tokens_total", 0.0)
@@ -3493,9 +4183,9 @@ def render_market_conditions_tab(sim: SimulationConfig) -> SimulationConfig:
     with c1:
         years = st.slider(
             "Simulation length (years)",
-            1,
-            15,
-            sim.years,
+            min_value=1,
+            max_value=50,
+            value=sim.years,
             help="How many real-world years you want to watch play out. Stretching the horizon exposes slow-rolling failures that short runs miss.",
         )
         sim.years = years
@@ -3854,6 +4544,384 @@ def render_market_conditions_tab(sim: SimulationConfig) -> SimulationConfig:
             step=0.01,
             help="Size of the hit when a macro shock shows up. Bigger values mean the nasty event wipes out users and confidence more aggressively.",
         )
+
+    st.subheader("Behavioral cohorts")
+    st.caption(
+        "Mix of investor archetypes and how strongly they react to signals. Shares are normalized automatically inside the model."
+    )
+    world = sim.external_world
+    wc1, wc2 = st.columns(2)
+    with wc1:
+        world.value_investor_share = st.slider(
+            "Value investors share",
+            min_value=0.05,
+            max_value=0.6,
+            value=float(world.value_investor_share),
+            step=0.01,
+            help="Fraction of users focused on fundamentals and scarcity. Higher share stabilizes selloffs when value is strong.",
+        )
+        world.momentum_trader_share = st.slider(
+            "Momentum traders share",
+            min_value=0.02,
+            max_value=0.5,
+            value=float(world.momentum_trader_share),
+            step=0.01,
+            help="Population chasing price trends. Larger share makes rallies and crashes sharper.",
+        )
+        world.passive_holder_share = st.slider(
+            "Passive holders share",
+            min_value=0.1,
+            max_value=0.7,
+            value=float(world.passive_holder_share),
+            step=0.01,
+            help="Sticky capital that slowly rebalances toward target allocations. Acts as the ballast of the system.",
+        )
+    with wc2:
+        world.contrarian_share = st.slider(
+            "Contrarian speculators share",
+            min_value=0.02,
+            max_value=0.4,
+            value=float(world.contrarian_share),
+            step=0.01,
+            help="Traders who buy fear and fade euphoria. Raise to introduce dip-buying support.",
+        )
+        world.panic_trader_share = st.slider(
+            "Panic-sensitive share",
+            min_value=0.02,
+            max_value=0.35,
+            value=float(world.panic_trader_share),
+            step=0.01,
+            help="Agents who dump quickly on drawdowns. Useful for stress testing cascading sell pressure.",
+        )
+        world.share_noise = st.slider(
+            "Population jitter",
+            min_value=0.0,
+            max_value=0.2,
+            value=float(world.share_noise),
+            step=0.01,
+            help="Adds randomness to cohort weights every run so scenarios are not perfectly repeatable.",
+        )
+    share_total = (
+        world.value_investor_share
+        + world.momentum_trader_share
+        + world.contrarian_share
+        + world.passive_holder_share
+        + world.panic_trader_share
+    )
+    st.caption(f"Current raw share total: {share_total:.2f} (normalized automatically when sim runs).")
+
+    with st.expander("Cohort intensity & sentiment dialing", expanded=False):
+        ci1, ci2 = st.columns(2)
+        with ci1:
+            world.value_intensity = st.number_input(
+                "Value conviction strength",
+                value=float(world.value_intensity),
+                min_value=0.2,
+                max_value=2.5,
+                step=0.05,
+                help="How aggressively value investors lean in when price trades below fundamentals.",
+            )
+            world.contrarian_intensity = st.number_input(
+                "Contrarian appetite",
+                value=float(world.contrarian_intensity),
+                min_value=0.2,
+                max_value=2.0,
+                step=0.05,
+                help="Responsiveness of contrarian traders to drawdowns and capitulation signals.",
+            )
+            world.contrarian_threshold = st.number_input(
+                "Contrarian trigger (drawdown)",
+                value=float(world.contrarian_threshold),
+                min_value=0.0,
+                max_value=0.2,
+                step=0.005,
+                help="Minimum drawdown before contrarians start buying dips.",
+            )
+            world.panic_drawdown_threshold = st.number_input(
+                "Panic trigger (drawdown)",
+                value=float(world.panic_drawdown_threshold),
+                min_value=0.0,
+                max_value=0.3,
+                step=0.005,
+                help="Drawdown level that kicks off panic selling.",
+            )
+            world.passive_adjust_speed = st.number_input(
+                "Passive rebalance speed",
+                value=float(world.passive_adjust_speed),
+                min_value=0.1,
+                max_value=0.8,
+                step=0.02,
+                help="How quickly passive holders glide back toward their desired allocation.",
+            )
+        with ci2:
+            world.momentum_intensity = st.number_input(
+                "Momentum chase strength",
+                value=float(world.momentum_intensity),
+                min_value=0.2,
+                max_value=2.5,
+                step=0.05,
+                help="Sensitivity of momentum traders to recent price trends.",
+            )
+            world.panic_intensity = st.number_input(
+                "Panic sell strength",
+                value=float(world.panic_intensity),
+                min_value=0.5,
+                max_value=2.5,
+                step=0.05,
+                help="How aggressively panic cohorts dump once triggered.",
+            )
+            world.sentiment_divergence = st.number_input(
+                "Sentiment drift strength",
+                value=float(world.sentiment_divergence),
+                min_value=0.05,
+                max_value=0.8,
+                step=0.01,
+                help="How much community sentiment nudges organic flow overall.",
+            )
+            world.scarcity_elasticity = st.number_input(
+                "Scarcity elasticity",
+                value=float(world.scarcity_elasticity),
+                min_value=0.2,
+                max_value=2.5,
+                step=0.05,
+                help="Impact of float scarcity on price support. Higher values tighten price when supply dries up.",
+            )
+            world.subsidy_hold_boost = st.number_input(
+                "Subsidy hold boost",
+                value=float(world.subsidy_hold_boost),
+                min_value=0.0,
+                max_value=1.5,
+                step=0.05,
+                help="How much gas subsidies/financial support increase willingness to hold.",
+            )
+
+    with st.expander("Market plumbing response", expanded=False):
+        mp1, mp2 = st.columns(2)
+        with mp1:
+            world.dilution_drag_strength = st.number_input(
+                "Dilution drag strength",
+                value=float(world.dilution_drag_strength),
+                min_value=0.0,
+                max_value=1.0,
+                step=0.05,
+                help="Penalty applied when fresh supply hits the market. Higher values strengthen sell pressure from minting.",
+            )
+            world.depth_sensitivity = st.number_input(
+                "Liquidity depth sensitivity",
+                value=float(world.depth_sensitivity),
+                min_value=0.1,
+                max_value=1.5,
+                step=0.05,
+                help="How strongly liquidity depth influences scarcity adjustments.",
+            )
+            world.liquidity_satiation = st.number_input(
+                "Liquidity satiation ceiling",
+                value=float(world.liquidity_satiation),
+                min_value=0.5,
+                max_value=2.5,
+                step=0.05,
+                help="Upper bound on liquidity boost from scarcity adjustments.",
+            )
+        with mp2:
+            world.heterogeneity_noise = st.slider(
+                "Behavior noise",
+                min_value=0.0,
+                max_value=0.5,
+                value=float(world.heterogeneity_noise),
+                step=0.02,
+                help="Random divergence in how cohorts react each step.",
+            )
+            world.macro_dispersion = st.slider(
+                "Macro dispersion",
+                min_value=0.1,
+                max_value=0.8,
+                value=float(world.macro_dispersion),
+                step=0.02,
+                help="How differently cohorts react to macro shocks.",
+            )
+            world.procyclical_bias = st.number_input(
+                "Procyclical bias",
+                value=float(world.procyclical_bias),
+                min_value=0.0,
+                max_value=1.0,
+                step=0.05,
+                help="Adds extra feedback loop when price trends align with crowd behavior.",
+            )
+
+    st.subheader("Order book liquidity dynamics")
+    liq = sim.liquidity_settings
+    lq1, lq2, lq3 = st.columns(3)
+    with lq1:
+        liq.maker_token_depth_mul = st.number_input(
+            "Treasury token depth weight",
+            value=float(liq.maker_token_depth_mul),
+            min_value=0.0,
+            max_value=1.0,
+            step=0.02,
+            help="How much each treasury token (in USD terms) props up order book depth.",
+        )
+        liq.maker_cash_depth_mul = st.number_input(
+            "Treasury cash depth weight",
+            value=float(liq.maker_cash_depth_mul),
+            min_value=0.0,
+            max_value=1.0,
+            step=0.02,
+            help="Liquidity contribution per dollar of deployable cash.",
+        )
+        liq.float_depth_mul = st.number_input(
+            "Float supply depth weight",
+            value=float(liq.float_depth_mul),
+            min_value=0.0,
+            max_value=0.05,
+            step=0.001,
+            format="%.4f",
+            help="How circulating supply translates into passive resting liquidity.",
+        )
+        liq.flow_to_depth_weight = st.number_input(
+            "Flow-to-depth conversion",
+            value=float(liq.flow_to_depth_weight),
+            min_value=0.0,
+            max_value=1.5,
+            step=0.05,
+            help="Scales how much observed trading flow becomes additional depth via market makers.",
+        )
+    with lq2:
+        liq.reversion_speed = st.number_input(
+            "Depth reversion speed",
+            value=float(liq.reversion_speed),
+            min_value=0.01,
+            max_value=1.0,
+            step=0.02,
+            help="How quickly liquidity snaps back toward its structural target each step.",
+        )
+        liq.vol_sensitivity = st.number_input(
+            "Volatility sensitivity",
+            value=float(liq.vol_sensitivity),
+            min_value=0.0,
+            max_value=3.0,
+            step=0.05,
+            help="Penalty applied when realized volatility rises above the comfort band.",
+        )
+        liq.drawdown_sensitivity = st.number_input(
+            "Drawdown sensitivity",
+            value=float(liq.drawdown_sensitivity),
+            min_value=0.0,
+            max_value=2.0,
+            step=0.05,
+            help="How aggressively panic drawdowns drain standing depth.",
+        )
+        liq.deviation_sensitivity = st.number_input(
+            "Peg deviation sensitivity",
+            value=float(liq.deviation_sensitivity),
+            min_value=0.0,
+            max_value=1.0,
+            step=0.05,
+            help="Impact of persistent mispricing on market maker willingness to quote tight books.",
+        )
+    with lq3:
+        liq.flow_pressure_sensitivity = st.number_input(
+            "Flow pressure sensitivity",
+            value=float(liq.flow_pressure_sensitivity),
+            min_value=0.0,
+            max_value=2.0,
+            step=0.05,
+            help="How much throughput saturation thins the order book.",
+        )
+        liq.policy_support_weight = st.number_input(
+            "Policy support weight",
+            value=float(liq.policy_support_weight),
+            min_value=0.0,
+            max_value=1.0,
+            step=0.05,
+            help="Boost from active central-bank style interventions.",
+        )
+        liq.scarcity_weight = st.number_input(
+            "Scarcity weight",
+            value=float(liq.scarcity_weight),
+            min_value=0.0,
+            max_value=1.5,
+            step=0.05,
+            help="How strongly supply tightness deepens books.",
+        )
+        liq.latent_depth_noise = st.number_input(
+            "Latent depth noise",
+            value=float(liq.latent_depth_noise),
+            min_value=0.0,
+            max_value=0.2,
+            step=0.005,
+            format="%.3f",
+            help="Background randomness applied to liquidity to mimic fragmented venues.",
+        )
+
+    with st.expander("Liquidity stress dynamics", expanded=False):
+        ls1, ls2 = st.columns(2)
+        with ls1:
+            liq.stress_decay = st.slider(
+                "Stress memory decay",
+                min_value=0.5,
+                max_value=0.99,
+                value=float(liq.stress_decay),
+                step=0.01,
+                help="How quickly liquidity fears fade once conditions improve.",
+            )
+            liq.stress_gain = st.slider(
+                "Stress gain",
+                min_value=0.1,
+                max_value=1.0,
+                value=float(liq.stress_gain),
+                step=0.05,
+                help="How strongly shocks feed into the stress index.",
+            )
+            liq.stress_impact = st.slider(
+                "Stress impact on depth",
+                min_value=0.0,
+                max_value=0.8,
+                value=float(liq.stress_impact),
+                step=0.02,
+                help="Direct haircut applied to depth for each unit of accumulated stress.",
+            )
+            liq.volatility_floor = st.slider(
+                "Volatility comfort floor",
+                min_value=0.0,
+                max_value=0.15,
+                value=float(liq.volatility_floor),
+                step=0.005,
+                format="%.3f",
+                help="Noise level tolerated before the volatility penalty kicks in.",
+            )
+        with ls2:
+            liq.recovery_push = st.slider(
+                "Recovery reinforcement",
+                min_value=0.0,
+                max_value=0.6,
+                value=float(liq.recovery_push),
+                step=0.02,
+                help="How much remaining structural depth pulls the book back after a shock.",
+            )
+            liq.max_step_drop = st.slider(
+                "Max step drop",
+                min_value=0.05,
+                max_value=0.6,
+                value=float(liq.max_step_drop),
+                step=0.02,
+                help="Hard cap on how much liquidity can fall in a single simulation step.",
+            )
+            liq.max_step_rise = st.slider(
+                "Max step rise",
+                min_value=0.05,
+                max_value=1.0,
+                value=float(liq.max_step_rise),
+                step=0.02,
+                help="Maximum burst of liquidity provision allowed per step.",
+            )
+            liq.pressure_floor = st.slider(
+                "Flow comfort band",
+                min_value=0.3,
+                max_value=2.0,
+                value=float(liq.pressure_floor),
+                step=0.05,
+                help="Average flow/depth ratio before makers start pulling quotes.",
+            )
 
     st.subheader("Token Supply Controls")
     plan = sim.supply_plan
