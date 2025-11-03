@@ -1,6 +1,16 @@
-# 2thamoon - a really shitty crypto sim
+# 2thamoon - a crypto sandbox simulator
 
-## Try it here: [https://2thamoon.streamlit.app/](https://2thamoon.streamlit.app/)
+[![Streamlit](https://img.shields.io/badge/built_with-Streamlit-ff4b4b.svg)](https://streamlit.io/)
+![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
+![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)
+
+**Try it:** **https://2thamoon.streamlit.app/**
+
+Simulate the mess. 2thamoon lets you crank the knobs on hype, liquidity, whales, attackers, and treasury policy to watch markets rip, stall, or implode. with 300+ things to mess with i reckon its impossible to see/do it all
+
+---
+
+
 
 hi guys. so im studying biz so i decided fuck it i wanna learn about crypto and how markets work. I'll be honest i didnt know shit about them so i decided to hand the project off to codex with my specs. I have read over the code a few times but its very vibe coded i want to preface with that. however its not vibe tested, ive used it and iterated on it a ton. it works decently imo. its built on streamlit so its actually really bug free the only issues and places where the sim has weird edge cases. There are so so so many things to mess with. from modifying growth, to algos, to making a stable coin, to defending against pump and dumps, to causing pump and dumbs, so so much. this is not a game however, its a literal simulator. imo its really fun. 
 
@@ -23,7 +33,7 @@ i will however note this started off as a way for me to sim a stable coin pegged
 - growth and lack there of: you can control how many people flood in and how easy they are willing to panic sell
 - hype: simulate outside hype and '2thamoon' attitude
 - market regime shifts (bull/bear/neutral) that mess with your coins
-- whale behavior simulation -- because every market has those dickheads
+- whale, retail, and other types of buyers behavior simulation
 - organic user growth with adoption curves and churn mechanics
 - liquidity depth modeling with real slippage calculation
 
