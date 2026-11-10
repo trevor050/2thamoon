@@ -45,7 +45,7 @@ def headline(res: SimResult) -> str:
         end = float(p[-1] / s["peg"][-1])
         if end < 0.5:
             return (
-                f"The peg broke and never came back: the coin ends at {end:.0%} of its target after {days} days, "
+                f"The peg broke and never came back: the coin ends at {end:.1%} of its target after {days} days, "
                 f"and governance supply grew {s['gov_supply'][-1] / s['gov_supply'][0]:,.0f}x."
             )
         if low < 0.98:

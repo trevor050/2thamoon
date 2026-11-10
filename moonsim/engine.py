@@ -179,7 +179,9 @@ def _fmt_usd(x: float) -> str:
         return f"${x:,.2f}"
     if ax == 0:
         return "$0"
-    return f"${x:.4g}"
+    if ax >= 0.001:
+        return f"${x:.3g}"
+    return f"${x:.2e}"
 
 
 def _fmt_num(x: float) -> str:
