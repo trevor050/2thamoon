@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "moonsim"
+version = "2.0.0"
+description = "Deterministic agent-based crypto market sandbox: the engine behind 2thamoon."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = ["numpy>=1.26"]
+
+[project.optional-dependencies]
+app = ["streamlit>=1.40", "pandas>=2.1", "plotly>=5.20"]
+dev = ["pytest>=8", "hypothesis>=6.100", "ruff>=0.6"]
+
+[tool.setuptools]
+packages = ["moonsim"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E731", "UP007", "UP006", "UP035", "B905"]
