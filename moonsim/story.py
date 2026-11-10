@@ -84,7 +84,7 @@ def key_stats(res: SimResult) -> List[Stat]:
             Stat(
                 "Governance supply",
                 f"{s['gov_supply'][-1] / s['gov_supply'][0]:,.1f}x",
-                f"price {_fmt_usd(s['gov_price'][0])} to {_fmt_usd(s['gov_price'][-1])}",
+                f"price {_fmt_usd(s['gov_price'][0])} → {_fmt_usd(s['gov_price'][-1])}",
             )
         )
         stats.append(

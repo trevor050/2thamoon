@@ -31,6 +31,7 @@ SECOND = "#eb6834"
 THIRD = "#1baf7a"
 REGIME_FILL = {0: "rgba(227, 73, 72, 0.09)", 2: "rgba(27, 175, 122, 0.10)"}  # bear, bull
 
+BOTTOM_LEGEND = dict(orientation="h", yanchor="top", y=-0.1, xanchor="left", x=0, title_text="")
 BASE_LAYOUT = dict(
     margin=dict(l=8, r=8, t=36, b=8),
     hovermode="x unified",
@@ -92,10 +93,17 @@ def price_story(res: SimResult, events: Sequence[Event], log_scale: bool | None 
         )
     fig.add_trace(go.Scatter(x=day, y=price, name="Price", line=dict(color=PRICE, width=2), hovertemplate="%{y:$.4~g}"))
     if events:
-        xs = [e.day for e in events]
-        ys = [price[min(e.day, len(price) - 1)] for e in events]
-        labels = [str(i + 1) for i in range(len(events))]
-        hover = [f"<b>{i + 1}. {e.title}</b><br>{_wrap(e.detail)}" for i, e in enumerate(events)]
+        # One marker per day; same-day events share it ("1-3") so numbers never pile up.
+        by_day: Dict[int, List[int]] = {}
+        for i, e in enumerate(events):
+            by_day.setdefault(e.day, []).append(i)
+        xs = list(by_day)
+        ys = [price[min(d, len(price) - 1)] for d in xs]
+        labels = [f"{ix[0] + 1}" if len(ix) == 1 else f"{ix[0] + 1}-{ix[-1] + 1}" for ix in by_day.values()]
+        hover = [
+            "<br>".join(f"<b>{i + 1}. {events[i].title}</b><br>{_wrap(events[i].detail)}" for i in ix)
+            for ix in by_day.values()
+        ]
         fig.add_trace(
             go.Scatter(
                 x=xs,
@@ -274,7 +282,7 @@ def crowd(res: SimResult) -> go.Figure:
         row=3,
         col=1,
     )
-    fig.update_layout(**{**BASE_LAYOUT, "xaxis": {}}, height=520, showlegend=True)
+    fig.update_layout(**{**BASE_LAYOUT, "xaxis": {}, "legend": BOTTOM_LEGEND}, height=560, showlegend=True)
     fig.update_xaxes(showgrid=False)
     fig.update_xaxes(title_text="Day", row=3, col=1)
     fig.update_yaxes(range=[0, 1], row=2, col=1)
@@ -309,8 +317,8 @@ def stablecoin(res: SimResult) -> go.Figure:
     fig.add_trace(
         go.Scatter(
             x=day,
-            y=np.minimum(s["backing_ratio"], 10),
-            name="Backing incl. governance tokens",
+            y=np.minimum(s["backing_ratio"], 5),
+            name="Backing incl. governance tokens (capped at 500%)",
             line=dict(color=PEG, width=1.5, dash="dash"),
             hovertemplate="%{y:.1%}",
         ),
@@ -339,13 +347,13 @@ def stablecoin(res: SimResult) -> go.Figure:
         row=3,
         col=1,
     )
-    fig.update_layout(**{**BASE_LAYOUT, "xaxis": {}}, height=560)
+    fig.update_layout(**{**BASE_LAYOUT, "xaxis": {}, "legend": BOTTOM_LEGEND}, height=600)
     fig.update_xaxes(showgrid=False)
     fig.update_xaxes(title_text="Day", row=3, col=1)
     fig.update_yaxes(tickformat=".0%", row=1, col=1)
     gp = s["gov_price"]
     if np.nanmax(gp) / max(np.nanmin(gp), 1e-300) > 20:
-        fig.update_yaxes(type="log", tickformat="$.1e", row=2, col=1)
+        fig.update_yaxes(type="log", exponentformat="power", tickprefix="$", row=2, col=1)
         _tidy_log_axis(fig, gp, row=2, col=1)
     gs = s["gov_supply"]
     if np.nanmax(gs) / max(np.nanmin(gs), 1e-300) > 20:

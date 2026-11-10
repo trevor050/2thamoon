@@ -88,6 +88,11 @@ CHOICE_LABELS = {
 ss = st.session_state
 
 
+def md(text: str) -> str:
+    """Escape dollar signs so Streamlit does not render '$3M ... $7M' as LaTeX."""
+    return text.replace("$", "\\$")
+
+
 # --------------------------------------------------------------------------- state
 
 
@@ -313,7 +318,7 @@ def render_header() -> None:
     loaded = PRESET_BY_KEY.get(ss.loaded)
     n_changed = changed_knobs()
     if loaded is not None:
-        st.markdown(loaded.blurb)
+        st.markdown(md(loaded.blurb))
     seed_col, roll_col, note_col = st.columns([1.2, 1.2, 4], vertical_alignment="bottom")
     with seed_col:
         render_knob(KNOB_BY_PATH["run.seed"])
@@ -336,14 +341,15 @@ def render_results(cfg: SimConfig, res: SimResult) -> None:
     stable = cfg.run.mode == "stablecoin"
     for w in res.warnings:
         st.warning(w)
-    st.subheader(story.headline(res))
+    st.subheader(md(story.headline(res)))
 
     stats = story.key_stats(res)
-    cols = st.columns(len(stats))
-    for col, stat in zip(cols, stats):
-        with col:
-            st.metric(stat.label, stat.value)
-            st.caption(stat.note)
+    with st.container(key="stats"):
+        cols = st.columns(len(stats))
+        for col, stat in zip(cols, stats):
+            with col:
+                st.metric(stat.label, stat.value)
+                st.caption(md(stat.note))
 
     events = story.key_events(res, limit=10)
     left, right = st.columns([2.3, 1], gap="medium")
@@ -354,13 +360,13 @@ def render_results(cfg: SimConfig, res: SimResult) -> None:
     with right:
         st.markdown("**What happened**")
         if events:
-            st.markdown("\n".join(f"{i + 1}. **Day {e.day}: {e.title}.** {e.detail}" for i, e in enumerate(events)))
+            st.markdown(md("\n".join(f"{i + 1}. **Day {e.day}: {e.title}.** {e.detail}" for i, e in enumerate(events))))
         else:
             st.markdown("Nothing dramatic. Sometimes the market just drifts.")
 
     st.markdown("**Who moved the price**")
     st.caption(
-        story.who_moved_it(res) + " Bars above zero are dollars coming into the pool (buying), below zero "
+        md(story.who_moved_it(res)) + " Bars above zero are dollars coming into the pool (buying), below zero "
         "are dollars going out (selling)."
     )
     st.plotly_chart(charts.flows(res), key="flows_chart", config={"displaylogo": False})
@@ -452,7 +458,12 @@ def main() -> None:
     st.set_page_config(page_title="2thamoon", page_icon="🌕", layout="wide")
     st.markdown(
         "<style>[data-testid='stMetricValue']{font-size:1.65rem}"
-        "[data-testid='stMetric']{margin-bottom:-0.6rem}</style>",
+        "[data-testid='stMetric']{margin-bottom:-0.6rem}"
+        # Two stat tiles per row on phones instead of six stacked rows.
+        "@media (max-width: 640px){.st-key-stats [data-testid='stHorizontalBlock']{flex-flow:row wrap;gap:0.5rem 1rem}"
+        ".st-key-stats [data-testid='stColumn']"
+        "{flex:1 1 calc(50% - 1rem)!important;min-width:calc(50% - 1rem)!important}}"
+        "</style>",
         unsafe_allow_html=True,
     )
     init_state()

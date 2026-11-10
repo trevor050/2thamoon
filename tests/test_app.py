@@ -29,7 +29,7 @@ def test_each_preset_deep_links_and_runs(preset):
     at.query_params["scenario"] = preset.key
     at.run()
     assert not at.exception
-    assert preset.blurb in [m.value for m in at.markdown]
+    assert preset.blurb.replace("$", "\\$") in [m.value for m in at.markdown]
     assert at.session_state["preset_pick"] == preset.key
 
 
