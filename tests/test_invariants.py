@@ -109,3 +109,17 @@ def test_attacker_exit_value_includes_the_transfer_tax():
     sim = Simulation(cfg, strict=True)
     actual_exit = sim.attacker.usd + sim.sell(sim.attacker, sim.attacker.token, "attacker")
     assert np.isclose(actual_exit, sim.attacker_start_value, rtol=1e-12)
+
+
+def test_strict_ledger_rejects_nonfinite_wallets():
+    from moonsim.engine import ConservationError, Simulation
+
+    for value in (float("nan"), float("inf"), -float("inf")):
+        sim = Simulation(SimConfig(), strict=True)
+        sim.holders.usd = value
+        try:
+            sim.check_conservation()
+        except ConservationError:
+            pass
+        else:
+            raise AssertionError(f"strict ledger accepted {value}")

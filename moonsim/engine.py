@@ -392,6 +392,24 @@ class Simulation:
 
     def check_conservation(self) -> Tuple[float, float, float]:
         """Relative errors of the three ledgers. All should be ~1e-15."""
+        if self.strict:
+            balances = [v for w in self.wallets for v in (w.token, w.usd, w.gov, w.lp)]
+            balances += [
+                self.pool.token,
+                self.pool.usd,
+                self.pool.shares,
+                self.locked,
+                self.burned,
+                self.minted,
+                self.gov_minted,
+                self.gov_burned,
+                self.ext_in,
+                self.ext_out,
+            ]
+            if self.gov_pool is not None:
+                balances += [self.gov_pool.token, self.gov_pool.usd, self.gov_pool.shares]
+            if not all(math.isfinite(v) for v in balances):
+                raise ConservationError("nonfinite balance in ledger")
         tok_expected = self.token0 + self.minted
         usd_expected = self.usd0 + self.ext_in - self.ext_out
         gov_expected = self.gov0 + self.gov_minted
