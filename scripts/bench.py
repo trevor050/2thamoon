@@ -6,7 +6,11 @@ python scripts/bench.py
 from __future__ import annotations
 
 import statistics
+import sys
 import time
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from moonsim import run, run_many
 from moonsim.presets import PRESETS
