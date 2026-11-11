@@ -50,12 +50,51 @@ class ConservationError(AssertionError):
 
 
 @dataclass
+class _RunningSum:
+    """Neumaier sum: retain the low bits lost when cumulative turnover grows.
+
+    Conservation uses both components in one fsum, never the rounded total of
+    two large counters subtracted from each other. Storage is constant size.
+    """
+
+    high: float = 0.0
+    low: float = 0.0
+
+    def add(self, amount: float) -> None:
+        total = self.high + amount
+        if abs(self.high) >= abs(amount):
+            self.low += (self.high - total) + amount
+        else:
+            self.low += (amount - total) + self.high
+        self.high = total
+
+    @property
+    def value(self) -> float:
+        return math.fsum((self.high, self.low))
+
+
 class Wallet:
-    name: str
-    token: float = 0.0
-    usd: float = 0.0
-    gov: float = 0.0
-    lp: float = 0.0
+    """Cash retains low bits while a large cohort wallet drains through churn."""
+
+    def __init__(self, name: str, token: float = 0.0, usd: float = 0.0, gov: float = 0.0, lp: float = 0.0):
+        self.name, self.token, self.gov, self.lp = name, token, gov, lp
+        self._usd = _RunningSum(usd)
+
+    @property
+    def usd(self) -> float:
+        value = self._usd.value
+        # A spendable float must not exceed the represented cash balance. Keep
+        # sub-ULP change in the wallet instead of overdrawing it on an all-in buy.
+        if math.isfinite(value) and value > 0 and math.fsum((self._usd.high, self._usd.low, -value)) < 0:
+            return math.nextafter(value, 0.0)
+        return value
+
+    @usd.setter
+    def usd(self, value: float) -> None:
+        self._usd = _RunningSum(value)
+
+    def add_usd(self, amount: float) -> None:
+        self._usd.add(amount)
 
 
 @dataclass(frozen=True)
@@ -262,7 +301,7 @@ class Simulation:
         # Noise traders start half in tokens, taken from the holders' allocation.
         noise_tok = min(self.noise.usd * 0.5 / launch_price, h_tok * 0.5)
         self.noise.token = noise_tok
-        self.noise.usd -= noise_tok * launch_price
+        self.noise.add_usd(-(noise_tok * launch_price))
         h_tok -= noise_tok
         self.holders.token = h_tok
 
@@ -292,8 +331,8 @@ class Simulation:
         self.locked = i_tok
         self.locked_initial = i_tok
         self.unlocked = 0.0
-        self.burned = 0.0
-        self.minted = 0.0
+        self._burned = _RunningSum()
+        self._minted = _RunningSum()
 
         allocated = pool_tokens + h_tok + noise_tok + w_tok + i_tok + a_tok
         self.treasury.token = max(0.0, total - allocated)
@@ -304,8 +343,8 @@ class Simulation:
         # Stablecoin machinery: reserve, governance token and its pool.
         self.gov_pool: Pool | None = None
         self.protocol_failed = False
-        self.gov_minted = 0.0
-        self.gov_burned = 0.0
+        self._gov_minted = _RunningSum()
+        self._gov_burned = _RunningSum()
         self.gov_total0 = 0.0
         self.redeemed_total = 0.0
         if self.stable:
@@ -338,10 +377,11 @@ class Simulation:
             *self.whales,
         ]
         self.token0 = self._token_total()
+        self._initial_usd = self._cash_components()
         self.usd0 = self._usd_total()
         self.gov0 = self._gov_total()
-        self.ext_in = 0.0
-        self.ext_out = 0.0
+        self._ext_in = _RunningSum()
+        self._ext_out = _RunningSum()
 
         # Baseline for attacker PnL: what they could have walked away with on day 0.
         self.attacker_start_value = self.attacker.usd + self.pool.quote_sell(self.attacker.token * (1.0 - self.tax))
@@ -390,22 +430,49 @@ class Simulation:
 
     # ------------------------------------------------------------ accounting
 
+    @property
+    def minted(self) -> float:
+        return self._minted.value
+
+    @property
+    def burned(self) -> float:
+        return self._burned.value
+
+    @property
+    def gov_minted(self) -> float:
+        return self._gov_minted.value
+
+    @property
+    def gov_burned(self) -> float:
+        return self._gov_burned.value
+
+    @property
+    def ext_in(self) -> float:
+        return self._ext_in.value
+
+    @property
+    def ext_out(self) -> float:
+        return self._ext_out.value
+
     def _token_total(self) -> float:
-        return sum(w.token for w in self.wallets) + self.pool.token + self.locked + self.burned
+        return math.fsum([w.token for w in self.wallets] + [self.pool.token, self.locked, self.burned])
 
     def _usd_total(self) -> float:
-        total = sum(w.usd for w in self.wallets) + self.pool.usd
-        if self.gov_pool is not None:
-            total += self.gov_pool.usd
-        return total
+        return math.fsum(self._cash_components())
+
+    def _cash_components(self) -> List[float]:
+        return [v for w in self.wallets for v in (w._usd.high, w._usd.low)] + [
+            self.pool.usd,
+            self.gov_pool.usd if self.gov_pool else 0.0,
+        ]
 
     def _gov_total(self) -> float:
         if self.gov_pool is None:
             return 0.0
-        return sum(w.gov for w in self.wallets) + self.gov_pool.token + self.gov_burned
+        return math.fsum([w.gov for w in self.wallets] + [self.gov_pool.token, self.gov_burned])
 
     def check_conservation(self) -> Tuple[float, float, float]:
-        """Relative errors of the three ledgers. All should be ~1e-15."""
+        """Relative residuals of all four ledgers, summed before rounding/cancellation."""
         if self.strict:
             balances = [v for w in self.wallets for v in (w.token, w.usd, w.gov, w.lp)]
             balances += [
@@ -424,13 +491,25 @@ class Simulation:
                 balances += [self.gov_pool.token, self.gov_pool.usd, self.gov_pool.shares]
             if not all(math.isfinite(v) for v in balances):
                 raise ConservationError("nonfinite balance in ledger")
-        tok_expected = self.token0 + self.minted
-        usd_expected = self.usd0 + self.ext_in - self.ext_out
-        gov_expected = self.gov0 + self.gov_minted
-        tok_err = abs(self._token_total() - tok_expected) / max(tok_expected, 1.0)
-        usd_err = abs(self._usd_total() - usd_expected) / max(usd_expected, 1.0)
-        gov_err = abs(self._gov_total() - gov_expected) / max(gov_expected, 1.0) if self.gov_pool else 0.0
-        lp_err = abs(self.treasury.lp + self.lps.lp - self.pool.shares) / max(self.pool.shares, 1.0)
+        tok_expected = [self.token0, self._minted.high, self._minted.low]
+        usd_expected = self._initial_usd + [
+            self._ext_in.high,
+            self._ext_in.low,
+            -self._ext_out.high,
+            -self._ext_out.low,
+        ]
+        gov_expected = [self.gov0, self._gov_minted.high, self._gov_minted.low]
+        token = [w.token for w in self.wallets] + [self.pool.token, self.locked, self._burned.high, self._burned.low]
+        usd = self._cash_components()
+        gov = [w.gov for w in self.wallets] + [
+            self.gov_pool.token if self.gov_pool else 0.0,
+            self._gov_burned.high,
+            self._gov_burned.low,
+        ]
+        tok_err = abs(math.fsum(token + [-v for v in tok_expected])) / max(math.fsum(tok_expected), 1.0)
+        usd_err = abs(math.fsum(usd + [-v for v in usd_expected])) / max(math.fsum(usd_expected), 1.0)
+        gov_err = abs(math.fsum(gov + [-v for v in gov_expected])) / max(math.fsum(gov_expected), 1.0)
+        lp_err = abs(math.fsum((self.treasury.lp, self.lps.lp, -self.pool.shares))) / max(self.pool.shares, 1.0)
         worst = max(tok_err, usd_err, gov_err, lp_err)
         if self.strict:
             if worst > CONSERVATION_TOL:
@@ -452,7 +531,7 @@ class Simulation:
 
     def _take_tax(self, amount: float) -> None:
         burn = amount * float(self.cfg.supply.tax_burn_share)
-        self.burned += burn
+        self._burned.add(burn)
         self.treasury.token += amount - burn
 
     def buy(self, w: Wallet, usd: float, group: str, taxed: bool = True) -> float:
@@ -460,7 +539,7 @@ class Simulation:
         if usd <= DUST:
             return 0.0
         out = self.pool.buy(usd)
-        w.usd -= usd
+        w.add_usd(-usd)
         tax = out * self.tax if taxed else 0.0
         w.token += out - tax
         if tax > 0:
@@ -478,7 +557,7 @@ class Simulation:
         if tax > 0:
             self._take_tax(tax)
         usd = self.pool.sell(tokens - tax)
-        w.usd += usd
+        w.add_usd(usd)
         self.flows[group] -= usd
         self.volume += usd
         return usd
@@ -585,7 +664,7 @@ class Simulation:
         if amount <= 0:
             return 0.0
         w.token += amount
-        self.minted += amount
+        self._minted.add(amount)
         return amount
 
     def _emit(self, day: int) -> None:
@@ -650,8 +729,8 @@ class Simulation:
             sigma = c.ticket_noise / math.sqrt(max(new, 1.0))
             ticket = c.ticket_usd * regime_ticket * math.exp(float(self.rng.normal(-0.5 * sigma**2, sigma)))
             cash = new * ticket
-            self.holders.usd += cash
-            self.ext_in += cash
+            self.holders.add_usd(cash)
+            self._ext_in.add(cash)
             self.users += new
             self.newcomer_cash += cash
 
@@ -667,8 +746,8 @@ class Simulation:
             return
         self.sell_capped(self.holders, self.holders.token * frac, "holders", self.cfg.crowd.panic_slippage)
         cash_out = self.holders.usd * frac
-        self.holders.usd -= cash_out
-        self.ext_out += cash_out
+        self.holders.add_usd(-cash_out)
+        self._ext_out.add(cash_out)
         self.users -= self.users * frac
 
     def _act_holders(self, day: int) -> None:
@@ -937,7 +1016,7 @@ class Simulation:
             got = self.buy(tr, spend, "treasury", taxed=False)
             if tc.burn_buybacks and got > 0:
                 tr.token -= got
-                self.burned += got
+                self._burned.add(got)
         self._check_treasury(day)
 
     def _check_treasury(self, day: int) -> None:
@@ -1040,16 +1119,16 @@ class Simulation:
             got = self.buy(self.arbs, best[1], "arbitrageurs")
             r_tok, r_usd, r_gov = self._quote_redeem(got)
             self.arbs.token -= r_tok
-            self.burned += r_tok
+            self._burned.add(r_tok)
             self.redeemed_total += r_tok
             self.redeemed_today += r_tok
             self.redeem_cap_left -= r_tok
-            self.reserve.usd -= r_usd
-            self.arbs.usd += r_usd
+            self.reserve.add_usd(-r_usd)
+            self.arbs.add_usd(r_usd)
             if r_gov > 0:
-                self.gov_minted += r_gov
+                self._gov_minted.add(r_gov)
                 self.arbs.gov += r_gov
-                self.arbs.usd += gp.sell(r_gov)
+                self.arbs.add_usd(gp.sell(r_gov))
                 self.arbs.gov = 0.0
                 self._check_governance(day)
             # Any leftover coins (tax rounding, cap) go back to the pool.
@@ -1079,12 +1158,12 @@ class Simulation:
             if best is None:
                 return
             _, tok, usd_part, gov_cost = best
-            self.arbs.usd -= usd_part
-            self.reserve.usd += usd_part
+            self.arbs.add_usd(-usd_part)
+            self.reserve.add_usd(usd_part)
             if gov_cost > 0:
-                self.arbs.usd -= gov_cost
+                self.arbs.add_usd(-gov_cost)
                 bought = gp.buy(gov_cost)
-                self.gov_burned += bought
+                self._gov_burned.add(bought)
                 self._check_governance(day)
             self._mint_tokens(self.arbs, tok)
             self.sell(self.arbs, tok, "arbitrageurs")
@@ -1118,13 +1197,13 @@ class Simulation:
         if gap > 0:
             spend = min(gap, w.usd, gp.usd_to_reach_price(g * (1.0 + slip)))
             if spend > DUST:
-                w.usd -= spend
+                w.add_usd(-spend)
                 w.gov += gp.buy(spend)
         elif gap < 0:
             qty = min(-gap / g, w.gov, gp.tokens_to_reach_price(g * (1.0 - slip)))
             if qty > DUST:
                 w.gov -= qty
-                w.usd += gp.sell(qty)
+                w.add_usd(gp.sell(qty))
         self._check_governance(day)
 
     # ------------------------------------------------------------- LPs
@@ -1149,7 +1228,7 @@ class Simulation:
             if t_out > 0:
                 w.lp -= burned_shares
                 w.token += t_out
-                w.usd += u_out
+                w.add_usd(u_out)
                 if not self._lp_fleeing:
                     self._lp_fleeing = True
                     self._event(
@@ -1167,7 +1246,7 @@ class Simulation:
             if lq.lp_return_rate > 0 and w.token > DUST and w.usd > DUST:
                 t_used, u_used, minted = self.pool.add_liquidity(w.token * lq.lp_return_rate, w.usd * lq.lp_return_rate)
                 w.token -= t_used
-                w.usd -= u_used
+                w.add_usd(-u_used)
                 w.lp += minted
 
     # ------------------------------------------------------------- main loop
