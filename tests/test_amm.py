@@ -88,3 +88,12 @@ def test_rejects_bad_pools():
         Pool(token=0.0, usd=1.0)
     with pytest.raises(ValueError):
         Pool(token=1.0, usd=1.0, fee=1.0)
+
+
+@pytest.mark.parametrize("side", ["buy", "sell"])
+def test_extreme_trade_does_not_round_the_output_reserve_to_zero(side):
+    pool = Pool(token=1e-12, usd=1e-12)
+    getattr(pool, side)(1e8)
+    assert pool.token > 0 and pool.usd > 0
+    assert math.isfinite(pool.price) and pool.price > 0
+    assert pool.k >= 1e-24

@@ -93,16 +93,18 @@ class Pool:
         if usd_in <= 0:
             return 0.0
         out = self.quote_buy(usd_in)
+        # Compute the remaining reserve directly. Subtracting an almost-full output
+        # rounds a thin pool to zero when the input dwarfs its reserve.
+        self.token *= self.usd / (self.usd + usd_in * (1.0 - self.fee))
         self.usd += usd_in
-        self.token -= out
         return out
 
     def sell(self, token_in: float) -> float:
         if token_in <= 0:
             return 0.0
         out = self.quote_sell(token_in)
+        self.usd *= self.token / (self.token + token_in * (1.0 - self.fee))
         self.token += token_in
-        self.usd -= out
         return out
 
     def add_liquidity(self, token: float, usd: float) -> tuple[float, float, float]:
