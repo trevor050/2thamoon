@@ -94,3 +94,9 @@ def test_engine_has_no_ui_dependencies():
 
     assert "streamlit" not in sys.modules
     assert "plotly" not in sys.modules
+
+
+def test_no_whales_keeps_the_full_launch_supply():
+    cfg = from_flat({"whales.count": 0})
+    res = run(cfg, strict=True)
+    assert res.series["total_supply"][0] == cfg.supply.total_supply

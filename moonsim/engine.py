@@ -266,6 +266,8 @@ class Simulation:
         self.newcomer_cash = 0.0  # part of holders.usd that newcomers came to spend
 
         n_whales = int(c.whales.count)
+        if n_whales == 0:
+            w_tok = 0.0  # Unassigned whale allocation remains in the treasury.
         self.whales: List[Wallet] = []
         self.whale_basis: List[float] = []
         self.whale_initial: List[float] = []
