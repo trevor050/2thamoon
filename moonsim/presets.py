@@ -138,8 +138,9 @@ PRESETS: Tuple[Preset, ...] = (
         key="death_spiral",
         title="Algorithmic stablecoin death spiral",
         blurb=(
-            "A stablecoin backed only by its own governance token (Terra style) pays 19.5% yield, and someone dumps "
-            "10% of the supply on day 15. Watch arbitrageurs redeem coins for freshly minted governance tokens and "
+            "A stablecoin backed only by its own governance token (Terra style) pays 19.5% yield, and "
+            "a two-day raid starts on day 15 with 9% of launch supply. Watch arbitrageurs redeem coins for freshly "
+            "minted governance tokens and "
             "dump them, which crashes the backing, which makes holders run, which mints even more."
         ),
         overrides={
