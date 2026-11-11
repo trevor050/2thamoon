@@ -889,11 +889,12 @@ class Simulation:
             return
 
         launch = self.launch_price
+        budget = tr.usd * tc.max_daily_spend
         if tc.band_defense:
             floor = tc.floor_x_launch * launch
             ceiling = tc.ceiling_x_launch * launch if tc.ceiling_x_launch > tc.floor_x_launch else 0.0
             if floor > 0 and self.pool.price < floor and tr.usd > DUST:
-                spend = min(self.pool.usd_to_reach_price(floor), tr.usd * tc.max_daily_spend)
+                spend = min(self.pool.usd_to_reach_price(floor), budget)
                 if spend > DUST:
                     self._event(
                         day,
@@ -904,6 +905,7 @@ class Simulation:
                         cooldown=20,
                     )
                     self.buy(tr, spend, "treasury", taxed=False)
+                    budget -= spend
             elif ceiling > 0 and self.pool.price > ceiling and tr.token > DUST:
                 qty = min(self.pool.tokens_to_reach_price(ceiling), tr.token * tc.max_daily_spend)
                 if qty > DUST:
@@ -917,7 +919,7 @@ class Simulation:
                     )
                     self.sell(tr, qty, "treasury", taxed=False)
         if tc.buyback_per_year > 0 and tr.usd > DUST:
-            spend = tr.usd * (1.0 - math.exp(-tc.buyback_per_year / DAYS_PER_YEAR))
+            spend = min(budget, tr.usd * (1.0 - math.exp(-tc.buyback_per_year / DAYS_PER_YEAR)))
             got = self.buy(tr, spend, "treasury", taxed=False)
             if tc.burn_buybacks and got > 0:
                 tr.token -= got

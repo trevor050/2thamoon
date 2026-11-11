@@ -123,3 +123,23 @@ def test_strict_ledger_rejects_nonfinite_wallets():
             pass
         else:
             raise AssertionError(f"strict ledger accepted {value}")
+
+
+def test_treasury_daily_cap_covers_buybacks_and_floor_defence_together():
+    from moonsim.engine import Simulation
+
+    for defend in (False, True):
+        for limit in (0.0, 0.001, 0.2):
+            cfg = from_flat(
+                {
+                    "treasury.band_defense": defend,
+                    "treasury.floor_x_launch": 100.0,
+                    "treasury.buyback_per_year": 10.0,
+                    "treasury.max_daily_spend": limit,
+                }
+            )
+            sim = Simulation(cfg, strict=True)
+            before = sim.treasury.usd
+            sim._act_treasury(1)
+            assert before - sim.treasury.usd <= before * limit + 1e-9
+            sim.check_conservation()
