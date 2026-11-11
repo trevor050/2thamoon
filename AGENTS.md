@@ -3,6 +3,10 @@
 Crypto market sandbox. Streamlit app on Streamlit Community Cloud (https://2thamoon.streamlit.app/), deployed from
 `master` running `app.py` at repo root with `requirements.txt`. Default branch is `master` (not main).
 
+Hosted copy: https://2thamoon.trevorrosato.com/ is a static Vercel site (`web/index.html` + `vercel.json`). It runs the same
+`app.py` in the browser with stlite (Pyodide); the build step only copies sources into `web/src/`. New source files must be
+added to the `sources` list in `web/index.html` (guarded by `tests/test_web_sources.py`). The stlite version pins Streamlit.
+
 ## Layout
 - `moonsim/` pure engine (numpy only; a test asserts no streamlit/plotly import). `amm.py` x*y=k pool,
   `engine.py` daily loop + agents + events + ledger checks, `config.py` frozen dataclass knobs (metadata drives UI),

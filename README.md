@@ -1,6 +1,6 @@
 # 2thamoon - a crypto sandbox simulator
 
-**Try it:** **https://2thamoon.streamlit.app/**
+**Try it:** **https://2thamoon.trevorrosato.com/** (runs entirely in your browser, the first load takes a few seconds)
 
 Simulate the mess. 2thamoon lets you crank the knobs on hype, liquidity, whales, attackers, market regimes and treasury policy to watch a token rip, stall, or implode. There are 139 knobs, and every one of them is wired to something real now.
 
@@ -43,13 +43,13 @@ each one loads with one click (or a link). they are just presets of the normal k
 
 | scenario | what to watch |
 |---|---|
-| [**Pump and dump**](https://2thamoon.streamlit.app/?scenario=pump_and_dump) | An attacker quietly buys into a thin pool, then buys hard and pays for a shill campaign so momentum traders and fresh newcomers pile in. Watch the attacker sell into that FOMO and leave the late buyers holding the bag. |
-| [**Whale exit into thin liquidity**](https://2thamoon.streamlit.app/?scenario=whale_exit) | One whale owns 8% of the supply and decides to cash out over five days into a pool with only $150k of dollars in it. Watch how little the whale actually gets compared to the paper value of the bag, and how the crash scares the LPs and the crowd into making it worse. |
-| [**Algorithmic stablecoin death spiral**](https://2thamoon.streamlit.app/?scenario=death_spiral) | A 99%-algorithmic stablecoin pays 19.5% yield with only 1% dollar backing, then a two-day raid starts on day 15 with 9% of launch supply. Watch redemptions hyperinflate the governance token until the protocol fails permanently and only pro-rata dollar collateral can be redeemed. |
-| [**Peg defence that holds**](https://2thamoon.streamlit.app/?scenario=peg_defense) | Same coin, same yield, same day-15 attack, but every coin is backed by a full dollar in reserve and redemptions pay out in those dollars. Watch the price dip, arbitrageurs redeem against the reserve, and the peg snap back while the governance token barely notices. |
-| [**The original: a gold-pegged coin**](https://2thamoon.streamlit.app/?scenario=gold_peg) | This is where 2thamoon started: a coin that tracks the price of gold, fully backed, but backed in dollars. Watch the collateral ratio: when gold rallies the coin's liabilities grow and the dollar reserve does not, so a fully backed coin quietly becomes an under-backed one. |
-| [**Vesting cliff dump**](https://2thamoon.streamlit.app/?scenario=unlock_cliff) | A hyped token rides a bull market while 30% of supply sits locked for the team and early investors. Watch the day-120 cliff hand insiders a quarter of their bag at once, and how steady insider selling turns a chart that only went up into a slow bleed. |
-| [**Fair launch sandbox**](https://2thamoon.streamlit.app/?scenario=sandbox) | A small token launches into a $250k pool with real holders, whales, insiders on a vesting schedule, and a market that drifts between bull and bear. Watch who is buying and selling each day, then change the seed: the same rules can moon or die on luck alone. |
+| [**Pump and dump**](https://2thamoon.trevorrosato.com/?scenario=pump_and_dump) | An attacker quietly buys into a thin pool, then buys hard and pays for a shill campaign so momentum traders and fresh newcomers pile in. Watch the attacker sell into that FOMO and leave the late buyers holding the bag. |
+| [**Whale exit into thin liquidity**](https://2thamoon.trevorrosato.com/?scenario=whale_exit) | One whale owns 8% of the supply and decides to cash out over five days into a pool with only $150k of dollars in it. Watch how little the whale actually gets compared to the paper value of the bag, and how the crash scares the LPs and the crowd into making it worse. |
+| [**Algorithmic stablecoin death spiral**](https://2thamoon.trevorrosato.com/?scenario=death_spiral) | A 99%-algorithmic stablecoin pays 19.5% yield with only 1% dollar backing, then a two-day raid starts on day 15 with 9% of launch supply. Watch redemptions hyperinflate the governance token until the protocol fails permanently and only pro-rata dollar collateral can be redeemed. |
+| [**Peg defence that holds**](https://2thamoon.trevorrosato.com/?scenario=peg_defense) | Same coin, same yield, same day-15 attack, but every coin is backed by a full dollar in reserve and redemptions pay out in those dollars. Watch the price dip, arbitrageurs redeem against the reserve, and the peg snap back while the governance token barely notices. |
+| [**The original: a gold-pegged coin**](https://2thamoon.trevorrosato.com/?scenario=gold_peg) | This is where 2thamoon started: a coin that tracks the price of gold, fully backed, but backed in dollars. Watch the collateral ratio: when gold rallies the coin's liabilities grow and the dollar reserve does not, so a fully backed coin quietly becomes an under-backed one. |
+| [**Vesting cliff dump**](https://2thamoon.trevorrosato.com/?scenario=unlock_cliff) | A hyped token rides a bull market while 30% of supply sits locked for the team and early investors. Watch the day-120 cliff hand insiders a quarter of their bag at once, and how steady insider selling turns a chart that only went up into a slow bleed. |
+| [**Fair launch sandbox**](https://2thamoon.trevorrosato.com/?scenario=sandbox) | A small token launches into a $250k pool with real holders, whales, insiders on a vesting schedule, and a market that drifts between bull and bear. Watch who is buying and selling each day, then change the seed: the same rules can moon or die on luck alone. |
 
 the unlock-cliff preset uses a 600-day average bull regime (formerly 400) so the expanded seeds 0–9 checks keep the run-up visible before the cliff, including seed 6; no engine rules or scenario assertions were weakened.
 
@@ -144,6 +144,7 @@ moonsim/            the simulation, pure python + numpy, no UI imports
   presets.py        the scenarios
   story.py          headline, key numbers, "who moved the price"
 moonsim_app/        the streamlit UI (controls are generated from config.py)
+web/                the hosted page: the same app run in the browser by stlite, no server
 tests/              AMM, property, determinism, scenario and app tests
 scripts/            legacy audit, benchmark, screenshot capture
 ```
