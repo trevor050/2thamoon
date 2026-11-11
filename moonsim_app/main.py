@@ -271,7 +271,10 @@ def render_knobs(mode: str) -> None:
         st.toggle(
             f"Show all {len(shown)} knobs",
             key="deep",
-            help=f"Off: the {len(shown) - n_deep} knobs that matter most. On: every knob, including {n_deep} deeper ones.",
+            help=(
+                f"Off: the {len(shown) - n_deep} knobs that matter most. "
+                f"On: every knob, including {n_deep} deeper ones."
+            ),
         )
     deep = ss.deep
     by_section: Dict[str, List[KnobSpec]] = {}
