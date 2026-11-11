@@ -59,6 +59,10 @@ def test_algorithmic_stablecoin_death_spiral(res):
     s = res.series
     rel = s["price"] / s["peg"]
     assert rel[-1] < 0.2, "the peg should be gone"
+    assert s["protocol_failed"][-1], "the showcase should reach terminal governance failure"
+    assert res.protocol_failure_day is not None
+    assert np.all(s["protocol_failed"][res.protocol_failure_day :])
+    assert sum(e.kind == "protocol_failed" for e in res.events) == 1
     assert s["gov_supply"][-1] > 10 * s["gov_supply"][0], "redemptions should hyperinflate the governance token"
     assert s["gov_price"][-1] < 0.01 * s["gov_price"][0]
     assert s["treasury_usd"][-1] < 0.05 * s["treasury_usd"][0], "the defence fund should be spent"
@@ -75,6 +79,7 @@ def test_successful_peg_defense(res):
     assert abs(rel[-1] - 1.0) < 0.02, "the peg should be restored"
     assert np.all(np.abs(rel[attack + 15 :] - 1.0) < 0.02), "and stay restored"
     assert s["reserve_usd"][-1] > 0.5 * s["reserve_usd"][0], "the reserve should survive"
+    assert not s["protocol_failed"].any(), "the fully backed companion must not fail"
     assert s["gov_supply"][-1] == pytest.approx(s["gov_supply"][0]), "no governance tokens minted"
 
 

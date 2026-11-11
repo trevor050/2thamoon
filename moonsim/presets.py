@@ -138,16 +138,15 @@ PRESETS: Tuple[Preset, ...] = (
         key="death_spiral",
         title="Algorithmic stablecoin death spiral",
         blurb=(
-            "A stablecoin backed only by its own governance token (Terra style) pays 19.5% yield, and "
-            "a two-day raid starts on day 15 with 9% of launch supply. Watch arbitrageurs redeem coins for freshly "
-            "minted governance tokens and "
-            "dump them, which crashes the backing, which makes holders run, which mints even more."
+            "A 99%-algorithmic stablecoin pays 19.5% yield with only 1% dollar backing, then a two-day raid starts "
+            "on day 15 with 9% of launch supply. Watch redemptions hyperinflate the governance token until the "
+            "protocol fails permanently and only pro-rata dollar collateral can be redeemed."
         ),
         overrides={
             **_STABLE_BASE,
             "run.seed": 5,
-            "stable.reserve_ratio": 0.0,
-            "stable.collateral_ratio": 0.0,
+            "stable.reserve_ratio": 0.01,
+            "stable.collateral_ratio": 0.01,
             "treasury.usd": 3_000_000.0,
             "treasury.max_daily_spend": 0.35,
         },
@@ -204,6 +203,8 @@ PRESETS: Tuple[Preset, ...] = (
             "run.days": 240,
             "run.seed": 2,
             "market.start_regime": "bull",
+            # Seed 6 otherwise leaves the bull regime on day 86, before the day-120 cliff.
+            # This calibrates the showcase under seeds 0-9; the parent engine behaved the same.
             "market.bull_days": 600.0,
             "market.shock_per_year": 0.0,
             "supply.insiders_share": 0.3,
