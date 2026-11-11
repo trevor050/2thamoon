@@ -112,8 +112,8 @@ class Pool:
         if token <= DUST or usd <= DUST:
             return 0.0, 0.0, 0.0
         ratio = min(token / self.token, usd / self.usd)
-        t_used = self.token * ratio
-        u_used = self.usd * ratio
+        t_used = min(token, self.token * ratio)
+        u_used = min(usd, self.usd * ratio)
         minted = self.shares * ratio
         self.token += t_used
         self.usd += u_used

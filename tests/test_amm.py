@@ -97,3 +97,11 @@ def test_extreme_trade_does_not_round_the_output_reserve_to_zero(side):
     assert pool.token > 0 and pool.usd > 0
     assert math.isfinite(pool.price) and pool.price > 0
     assert pool.k >= 1e-24
+
+
+def test_liquidity_add_never_spends_more_than_the_offered_wallet():
+    pool = Pool(token=344024838.4886541, usd=1000000.0)
+    offered = 24157.97273245977
+    token_used, usd_used, _ = pool.add_liquidity(offered, 1000000.0)
+    assert token_used <= offered
+    assert usd_used <= 1000000.0
