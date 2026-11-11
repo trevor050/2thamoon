@@ -331,7 +331,7 @@ class Simulation:
         self.ext_out = 0.0
 
         # Baseline for attacker PnL: what they could have walked away with on day 0.
-        self.attacker_start_value = self.attacker.usd + self.pool.quote_sell(self.attacker.token)
+        self.attacker_start_value = self.attacker.usd + self.pool.quote_sell(self.attacker.token * (1.0 - self.tax))
         self.attacker_phase = "waiting"
         self.attacker_phase_day = 0
         self.attacker_cost = 0.0
@@ -1116,7 +1116,7 @@ class Simulation:
         s["pool_token"][i] = self.pool.token
         s["market_cap"][i] = p * circulating
         s["fdv"][i] = p * total
-        s["exit_value"][i] = self.pool.quote_sell(outside_pool)
+        s["exit_value"][i] = self.pool.quote_sell(outside_pool * (1.0 - self.tax))
         s["circulating"][i] = circulating
         s["total_supply"][i] = total
         s["burned"][i] = self.burned
@@ -1142,7 +1142,7 @@ class Simulation:
         s["volume_usd"][i] = self.volume
         # What the attacker could walk away with right now: cash plus what the bag sells for (not paper value),
         # compared with what they could have walked away with on day 0.
-        value = self.attacker.usd + self.pool.quote_sell(self.attacker.token)
+        value = self.attacker.usd + self.pool.quote_sell(self.attacker.token * (1.0 - self.tax))
         s["attacker_value"][i] = value
         s["attacker_pnl"][i] = value - self.attacker_start_value
         s["attacker_token"][i] = self.attacker.token
