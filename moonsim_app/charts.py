@@ -351,6 +351,8 @@ def stablecoin(res: SimResult) -> go.Figure:
     fig.update_xaxes(showgrid=False)
     fig.update_xaxes(title_text="Day", row=3, col=1)
     fig.update_yaxes(tickformat=".0%", row=1, col=1)
+    if res.protocol_failure_day is not None:
+        fig.add_vline(x=res.protocol_failure_day, line_dash="dot", line_color=SECOND)
     gp = s["gov_price"]
     if np.nanmax(gp) / max(np.nanmin(gp), 1e-300) > 20:
         fig.update_yaxes(type="log", exponentformat="power", tickprefix="$", row=2, col=1)

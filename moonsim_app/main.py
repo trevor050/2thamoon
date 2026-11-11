@@ -380,6 +380,11 @@ def render_results(cfg: SimConfig, res: SimResult) -> None:
     tabs = dict(zip(names, st.tabs(names)))
     if stable:
         with tabs["Peg mechanics"]:
+            if res.protocol_failure_day is not None:
+                st.warning(
+                    f"Protocol failed on day {res.protocol_failure_day}. Governance payouts and dependent "
+                    "minting have stopped permanently. Redemptions receive only their pro-rata available collateral."
+                )
             st.caption(
                 "Redemptions pay out of the dollar reserve first (at the collateral ratio), the rest in newly "
                 "minted governance tokens that arbitrageurs dump. Watch the supply line."

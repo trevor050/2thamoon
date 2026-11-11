@@ -38,6 +38,11 @@ FLOW_GROUPS: Tuple[str, ...] = (
 REGIMES = ("bear", "neutral", "bull")
 DUST = 1e-9
 CONSERVATION_TOL = 1e-9
+# Economic terminal state, well before float underflow/overflow. These are triggers,
+# never price/reserve floors: the last traded governance reserves remain untouched.
+GOV_MIN_PRICE = 1e-12  # USD per governance token
+GOV_MIN_RESERVE = 1e-9  # either whole governance tokens or USD
+GOV_SUPPLY_CAP = 1e24  # reject a redemption that would issue beyond this supply
 
 
 class ConservationError(AssertionError):
@@ -78,12 +83,17 @@ class SimResult:
     def price(self) -> np.ndarray:
         return self.series["price"]
 
+    @property
+    def protocol_failure_day(self) -> int | None:
+        days = np.flatnonzero(self.series["protocol_failed"])
+        return int(days[0]) if days.size else None
+
     def frame(self):
         import pandas as pd  # local import: the engine itself only needs numpy
 
         return pd.DataFrame(self.series)
 
-    def summary(self) -> Dict[str, float]:
+    def summary(self) -> Dict[str, float | int | None]:
         s = self.series
         price = s["price"]
         start = float(price[0])
@@ -107,6 +117,7 @@ class SimResult:
             "end_exit_value": float(s["exit_value"][-1]),
             "attacker_pnl": float(s["attacker_pnl"][-1]),
             "volume_usd": float(np.sum(s["volume_usd"])),
+            "protocol_failure_day": self.protocol_failure_day,
         }
 
 
@@ -136,6 +147,7 @@ SERIES_NAMES: Tuple[str, ...] = (
     "backing_ratio",
     "gov_price",
     "gov_supply",
+    "protocol_failed",
     "redeemed",
     "volume_usd",
     "attacker_value",
@@ -291,6 +303,7 @@ class Simulation:
 
         # Stablecoin machinery: reserve, governance token and its pool.
         self.gov_pool: Pool | None = None
+        self.protocol_failed = False
         self.gov_minted = 0.0
         self.gov_burned = 0.0
         self.gov_total0 = 0.0
@@ -372,6 +385,7 @@ class Simulation:
     def _setup_series(self) -> None:
         n = self.days + 1
         self.series: Dict[str, np.ndarray] = {name: np.zeros(n) for name in SERIES_NAMES}
+        self.series["protocol_failed"] = np.zeros(n, dtype=bool)
         self.max_error = 0.0
 
     # ------------------------------------------------------------ accounting
@@ -934,12 +948,29 @@ class Simulation:
 
     # ------------------------------------------------------------ stablecoin
 
+    def _check_governance(self, day: int, issuing: float = 0.0) -> None:
+        """Permanently close governance-dependent operations before numbers lose meaning."""
+        gp = self.gov_pool
+        if gp is None or self.protocol_failed:
+            return
+        supply = self.gov0 + self.gov_minted - self.gov_burned + issuing
+        if gp.price < GOV_MIN_PRICE or min(gp.token, gp.usd) < GOV_MIN_RESERVE or supply > GOV_SUPPLY_CAP:
+            self.protocol_failed = True
+            self._event(
+                day,
+                "protocol_failed",
+                "Governance token failed",
+                "Governance payouts and dependent minting have stopped permanently; redemptions pay only "
+                "their pro-rata available collateral and the stablecoin keeps trading.",
+                3,
+            )
+
     def _backing_ratio(self) -> float:
         out = self.token0 + self.minted - self.burned
         if out <= DUST:
             return 10.0
         gov_cap = 0.0
-        if self.gov_pool is not None:
+        if self.gov_pool is not None and not self.protocol_failed:
             gov_circ = self.gov0 + self.gov_minted - self.gov_burned - self.gov_pool.token
             gov_cap = max(gov_circ, 0.0) * self.gov_pool.price
         return (self.reserve.usd + self.cfg.stable.gov_backing_weight * gov_cap) / (out * self.peg)
@@ -956,6 +987,12 @@ class Simulation:
             return 0.0, 0.0, 0.0
         value = tokens * self.peg * (1.0 - st.redeem_fee)
         usd_part = value * st.collateral_ratio
+        if self.protocol_failed:
+            outstanding = self.token0 + self.minted - self.burned
+            # Equal claim per outstanding coin, so early redeemers cannot drain
+            # collateral owed to the remaining holders. The shortfall is theirs.
+            available = self.reserve.usd * min(tokens / outstanding, 1.0) if outstanding > DUST else 0.0
+            return tokens, min(usd_part, available), 0.0
         if usd_part > self.reserve.usd and not st.fallback_to_gov:
             scale = self.reserve.usd / usd_part if usd_part > 0 else 0.0
             tokens *= scale
@@ -970,6 +1007,7 @@ class Simulation:
     def _arbitrage(self, day: int) -> None:
         if not self.stable or self.arbs.usd <= DUST:
             return
+        self._check_governance(day)
         st = self.cfg.stable
         pool, gp = self.pool, self.gov_pool
         assert gp is not None
@@ -994,6 +1032,11 @@ class Simulation:
                     best = (profit, usd)
             if best is None:
                 return
+            _, _, proposed = self._quote_redeem(pool.quote_buy(best[1]) * keep)
+            self._check_governance(day, issuing=proposed)
+            if self.protocol_failed and proposed > 0:
+                self._arbitrage(day)  # re-quote under collateral-only settlement
+                return
             got = self.buy(self.arbs, best[1], "arbitrageurs")
             r_tok, r_usd, r_gov = self._quote_redeem(got)
             self.arbs.token -= r_tok
@@ -1008,6 +1051,7 @@ class Simulation:
                 self.arbs.gov += r_gov
                 self.arbs.usd += gp.sell(r_gov)
                 self.arbs.gov = 0.0
+                self._check_governance(day)
             # Any leftover coins (tax rounding, cap) go back to the pool.
             if self.arbs.token > DUST:
                 self.sell(self.arbs, self.arbs.token, "arbitrageurs")
@@ -1016,6 +1060,8 @@ class Simulation:
             # buying governance tokens on their pool and burning them. Pure algorithmic coins (CR = 0) are
             # minted entirely by burning governance tokens, which is what pumps them in good times.
             cr = st.collateral_ratio
+            if self.protocol_failed and cr < 1.0:
+                return
             value_per = self.peg * (1.0 + st.mint_fee)
             full_tok = min(pool.tokens_to_reach_price(hi) / keep, self.arbs.usd / value_per)
             best: Tuple[float, float, float, float] | None = None
@@ -1039,12 +1085,14 @@ class Simulation:
                 self.arbs.usd -= gov_cost
                 bought = gp.buy(gov_cost)
                 self.gov_burned += bought
+                self._check_governance(day)
             self._mint_tokens(self.arbs, tok)
             self.sell(self.arbs, tok, "arbitrageurs")
 
     def _act_gov_holders(self, day: int) -> None:
         gp = self.gov_pool
-        if gp is None:
+        self._check_governance(day)
+        if gp is None or self.protocol_failed:
             return
         c, m = self.cfg.crowd, self.cfg.market
         g = gp.price
@@ -1077,6 +1125,7 @@ class Simulation:
             if qty > DUST:
                 w.gov -= qty
                 w.usd += gp.sell(qty)
+        self._check_governance(day)
 
     # ------------------------------------------------------------- LPs
 
@@ -1150,6 +1199,7 @@ class Simulation:
         s["treasury_usd"][i] = self.treasury.usd
         s["treasury_token"][i] = self.treasury.token
         s["reserve_usd"][i] = self.reserve.usd
+        s["protocol_failed"][i] = self.protocol_failed
         if self.stable and self.gov_pool is not None:
             s["collateral_ratio"][i] = self._collateral_ratio()
             s["backing_ratio"][i] = self._backing_ratio()
@@ -1249,7 +1299,7 @@ class Simulation:
                     "reserve_empty",
                     "Reserve is empty",
                     "Redemptions are now paid in freshly minted governance tokens."
-                    if self.cfg.stable.fallback_to_gov
+                    if self.cfg.stable.fallback_to_gov and not self.protocol_failed
                     else "Redemptions stop.",
                     3,
                 )

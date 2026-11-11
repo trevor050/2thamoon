@@ -33,4 +33,5 @@ Crypto market sandbox. Streamlit app on Streamlit Community Cloud (https://2tham
 ## PC test findings (2026-11-10)
 - Native Python 3.10.0 breaks current pytest/Hypothesis via CPython #88815; use a patched Python (3.13 tested).
 - Exact results vary across OS/Python/NumPy builds. Same-install determinism passes; do not claim cross-platform bit identity.
-- Unresolved: stablecoin CR=0.1795372879407694 + redeem_fee=0.0812446960837556, seed 7, crashes by day 110 as governance price underflows. Large cumulative churn can also trip the strict dollar ledger. Do not hide either with price floors or wider tolerances.
+- Governance failure is permanent: price <1e-12, either reserve <1e-9, or proposed supply >1e24. Never floor prices/reset reserves. Freeze governance trades/issuance, exclude governance backing, stop dependent mint arb; redemption pays min(promised collateral, pro-rata reserve), no governance. Stablecoin trading and collateral-only arb continue. `_check_governance` runs around governance trades and before issuance; result exposes boolean `protocol_failed` and `protocol_failure_day`.
+- Large cumulative churn can still trip the strict dollar ledger; fix numeric accounting without wider tolerances.

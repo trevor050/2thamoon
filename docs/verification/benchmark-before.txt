@@ -1,0 +1,9 @@
+macOS, Python 3.14.7, NumPy 2.4.2; baseline b6b173b; python3 scripts/bench.py
+sandbox          365 days    11.4 ms
+pump_and_dump    150 days     4.6 ms
+whale_exit       120 days     3.7 ms
+death_spiral     120 days    10.5 ms
+peg_defense      120 days     7.1 ms
+gold_peg         365 days    19.7 ms
+unlock_cliff     240 days     7.5 ms
+luck check: 30 seeds x 365 days     343 ms
