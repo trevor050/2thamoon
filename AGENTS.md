@@ -29,3 +29,8 @@ Crypto market sandbox. Streamlit app on Streamlit Community Cloud (https://2tham
   `st.session_state.flat`, widgets sync via `on_knob`. Keep that pattern.
 - Streamlit dev server does not hot-reload `moonsim` reliably; restart it after engine edits.
 - Attacker PnL = cash + exit value of bag now, minus the same on day 0 (not paper value).
+
+## PC test findings (2026-11-10)
+- Native Python 3.10.0 breaks current pytest/Hypothesis via CPython #88815; use a patched Python (3.13 tested).
+- Exact results vary across OS/Python/NumPy builds. Same-install determinism passes; do not claim cross-platform bit identity.
+- Unresolved: stablecoin CR=0.1795372879407694 + redeem_fee=0.0812446960837556, seed 7, crashes by day 110 as governance price underflows. Large cumulative churn can also trip the strict dollar ledger. Do not hide either with price floors or wider tolerances.

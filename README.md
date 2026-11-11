@@ -25,6 +25,16 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
+on Windows (PowerShell), with Python 3.13 installed:
+
+```powershell
+py -3.13 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m streamlit run app.py
+```
+
+Python 3.10.0 has a [dataclass bug](https://github.com/python/cpython/issues/88815) that breaks current test tools; use 3.10.1 or newer for development.
+
 then pick a scenario at the top. it runs instantly and tells you what happened.
 
 ## scenarios
@@ -86,7 +96,7 @@ traders set slippage limits (calm people split orders, panicking people eat a lo
 
 **regimes, hype, shocks.** the market drifts between bull, sideways and bear (a markov chain with average durations you set). each regime scales adoption, newcomer budgets, mood, churn and how nervous LPs are. hype waves and macro shocks arrive at random (Poisson), hype decays with a half-life, shocks hit everyones fear.
 
-**conservation and determinism.** every step the engine checks four ledgers: tokens (all wallets + pool + locked + burned = initial + minted), dollars (all wallets + pools = initial + newcomer cash in - churner cash out), governance tokens, and LP shares. the property tests throw dozens of random knob combinations (both modes, any values in range) at it on every test run, in strict mode, where any drift past 1e-9 or any negative balance raises. one seeded generator drives all randomness, so the same seed and knobs give the exact same run.
+**conservation and determinism.** every step the engine checks four ledgers: tokens (all wallets + pool + locked + burned = initial + minted), dollars (all wallets + pools = initial + newcomer cash in - churner cash out), governance tokens, and LP shares. the property tests throw dozens of random knob combinations (both modes, any values in range) at it on every test run, in strict mode, where any drift past 1e-9 or any negative balance raises. one seeded generator drives all randomness, so the same seed and knobs reproduce a run in the same environment. Windows, Linux and macOS can differ at floating-point precision; results are not bit-identical across platforms.
 
 **speed.** a 365-day run takes roughly 10 to 20 ms on my 2020 M1 MacBook Air, and the 30-seed luck check about a third of a second (`python scripts/bench.py`).
 
