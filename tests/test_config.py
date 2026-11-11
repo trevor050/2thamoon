@@ -46,3 +46,27 @@ def test_coerce_clamps_and_casts():
     choice = next(k for k in KNOBS if k.path == "run.mode")
     with pytest.raises(ValueError):
         coerce_value(choice, "lol")
+
+
+@pytest.mark.parametrize("data", [None, 42, "bad", [1]])
+def test_import_rejects_non_object_json(data):
+    with pytest.raises(ValueError, match="object"):
+        from_dict(data)
+
+
+@pytest.mark.parametrize(
+    "order",
+    [
+        {"day": "bad"},
+        {"day": -1},
+        {"days": 0},
+        {"days": float("inf")},
+        {"side": "hold"},
+        {"usd": -1},
+        {"usd": float("nan")},
+        {"usd": float("inf")},
+    ],
+)
+def test_import_rejects_invalid_manual_orders(order):
+    with pytest.raises(ValueError, match="manual order"):
+        from_dict({"attacker": {"style": "manual", "manual_orders": [order]}})

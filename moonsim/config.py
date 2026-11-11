@@ -11,6 +11,7 @@ Rates that say "per year" are converted to per-day inside the engine.
 
 from __future__ import annotations
 
+import math
 from dataclasses import MISSING, asdict, dataclass, field, fields, is_dataclass, replace
 from typing import Any, Dict, Iterator, List, Tuple
 
@@ -897,19 +898,35 @@ def to_dict(cfg: SimConfig) -> Dict[str, Any]:
 
 def from_dict(data: Dict[str, Any]) -> SimConfig:
     """Inverse of :func:`to_dict`. Unknown keys are ignored so old exports keep loading."""
+    if not isinstance(data, dict):
+        raise ValueError("knob file must contain a JSON object")
     flat: Dict[str, Any] = {}
     orders: Tuple[ManualOrder, ...] = ()
-    for section, values in (data or {}).items():
+    for section, values in data.items():
         if not isinstance(values, dict):
             continue
         for name, value in values.items():
             path = f"{section}.{name}"
             if path == "attacker.manual_orders":
-                orders = tuple(
-                    ManualOrder(**{k: v for k, v in o.items() if k in ManualOrder.__dataclass_fields__})
-                    for o in (value or [])
-                    if isinstance(o, dict)
-                )
+                if not isinstance(value, list):
+                    raise ValueError("manual orders must be a list")
+                parsed = []
+                for raw in value:
+                    try:
+                        if not isinstance(raw, dict):
+                            raise ValueError("expected an object")
+                        order = ManualOrder(**{k: v for k, v in raw.items() if k in ManualOrder.__dataclass_fields__})
+                        day, days, usd = float(order.day), float(order.days), float(order.usd)
+                        if not all(math.isfinite(v) for v in (day, days, usd)):
+                            raise ValueError("values must be finite")
+                        if day < 0 or not day.is_integer() or days < 1 or not days.is_integer() or usd < 0:
+                            raise ValueError("day, duration or amount is out of range")
+                        if order.side not in ("buy", "sell"):
+                            raise ValueError("side must be buy or sell")
+                        parsed.append(ManualOrder(day=int(day), days=int(days), side=order.side, usd=usd))
+                    except (ValueError, TypeError, OverflowError) as exc:
+                        raise ValueError(f"invalid manual order: {exc}") from exc
+                orders = tuple(parsed)
             elif path in KNOB_BY_PATH:
                 flat[path] = value
     cfg = from_flat(flat)
