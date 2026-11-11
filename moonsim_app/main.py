@@ -247,34 +247,44 @@ def visible(spec: KnobSpec, mode: str) -> bool:
     return True
 
 
-def render_sidebar(mode: str) -> None:
-    sb = st.sidebar
-    sb.header("Knobs")
+KNOB_COLUMNS = 4
+
+
+def render_grid(specs: List[KnobSpec]) -> None:
+    """Lay knobs out in rows across the page so a whole section can be scanned at once."""
+    for start in range(0, len(specs), KNOB_COLUMNS):
+        row = specs[start : start + KNOB_COLUMNS]
+        cols = st.columns(KNOB_COLUMNS, gap="medium", vertical_alignment="bottom")
+        for col, spec in zip(cols, row):
+            with col:
+                render_knob(spec)
+
+
+def render_knobs(mode: str) -> None:
+    """The knobs sit on the page, right above the chart they change, one tab per part of the market."""
     shown = [k for k in KNOBS if visible(k, mode)]
     n_deep = sum(k.advanced for k in shown)
-    sb.toggle(
-        f"Show all {len(shown)} knobs",
-        key="deep",
-        help=f"Off: the {len(shown) - n_deep} knobs that matter most. On: every knob, including {n_deep} deeper ones.",
-    )
+    title_col, deep_col = st.columns([3, 1.4], vertical_alignment="bottom")
+    with title_col:
+        st.markdown("**Mess with it.** Every knob reruns the market below.")
+    with deep_col:
+        st.toggle(
+            f"Show all {len(shown)} knobs",
+            key="deep",
+            help=f"Off: the {len(shown) - n_deep} knobs that matter most. On: every knob, including {n_deep} deeper ones.",
+        )
     deep = ss.deep
     by_section: Dict[str, List[KnobSpec]] = {}
     for k in shown:
         by_section.setdefault(k.section, []).append(k)
-    for section in SECTIONS[mode]:
-        specs = by_section.get(section, [])
-        if not specs:
-            continue
-        basic = [k for k in specs if not k.advanced]
+    sections = [s for s in SECTIONS[mode] if by_section.get(s)]
+    for section, tab in zip(sections, st.tabs([SECTION_TITLES[s] for s in sections])):
+        specs = by_section[section]
         extra = [k for k in specs if k.advanced]
-        with sb.expander(SECTION_TITLES[section], expanded=section == "run"):
-            for k in basic:
-                render_knob(k)
-            if deep:
-                for k in extra:
-                    render_knob(k)
-            elif extra:
-                st.caption(f"{len(extra)} more in deep mode.")
+        with tab:
+            render_grid([k for k in specs if deep or not k.advanced])
+            if extra and not deep:
+                st.caption(f"{len(extra)} more here with every knob shown.")
             if section == "attacker" and ss.flat["attacker.style"] == "manual":
                 render_orders()
 
@@ -478,8 +488,8 @@ def main() -> None:
     )
     init_state()
     mode = ss.flat["run.mode"]
-    render_sidebar(mode)
     render_header()
+    render_knobs(mode)
     cfg = current_config()
     res = simulate(_key(cfg))
     render_results(cfg, res)

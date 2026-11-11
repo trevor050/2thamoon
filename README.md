@@ -66,7 +66,7 @@ the two stablecoin scenarios are identical except for two knobs (reserve ratio a
 - **who moved the price**: net dollars each group put into or pulled out of the pool every day. this is the chart that explains everything
 - tabs for liquidity, supply, crowd mood, peg mechanics (stablecoins), the attacker, a **was it luck?** check that reruns your exact knobs under 30 other seeds, and the raw data (csv) plus knob import/export (json)
 
-the knobs live in the sidebar. by default you see the ~40 that matter most for the mode you are in; one toggle shows the other ~70.
+the knobs sit on the page right above the chart, one tab per part of the market. by default you see the ~40 that matter most for the mode you are in; one toggle shows the other ~70.
 
 ![Whale exit: market cap vs. what everyone could actually sell for](docs/screenshots/whale_exit_liquidity.png)
 
