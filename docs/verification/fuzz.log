@@ -1,0 +1,23 @@
+200 runs, 0 failures, 0.9s
+400 runs, 0 failures, 2.2s
+600 runs, 0 failures, 4.4s
+800 runs, 0 failures, 9.8s
+1000 runs, 0 failures, 15.5s
+1200 runs, 0 failures, 21.9s
+1400 runs, 0 failures, 27.7s
+1600 runs, 0 failures, 34.8s
+1800 runs, 0 failures, 41.2s
+2000 runs, 0 failures, 46.4s
+2200 runs, 0 failures, 51.9s
+2400 runs, 0 failures, 57.1s
+2600 runs, 0 failures, 62.9s
+2800 runs, 0 failures, 68.8s
+3000 runs, 0 failures, 75.3s
+3200 runs, 0 failures, 80.7s
+3400 runs, 0 failures, 86.2s
+3600 runs, 0 failures, 90.8s
+3800 runs, 0 failures, 97.0s
+4000 runs, 0 failures, 102.8s
+4200 runs, 0 failures, 109.8s
+4400 runs, 0 failures, 115.8s
+{"runs": 4556, "failures": 0, "worst_error": 2.1167675179776582e-13, "seconds": 121.27068745903671, "legacy_inputs": true, "raw_api_probes": [{"path": "liquidity.pool_usd", "value": 0.0, "outcome": "ValueError: pool reserves must be positive"}, {"path": "liquidity.lp_fee", "value": 1.0, "outcome": "ValueError: fee must be in [0, 1)"}, {"path": "supply.transfer_tax", "value": 1.0, "outcome": "ok"}, {"path": "run.days", "value": 0, "outcome": "ok"}, {"path": "run.days", "value": 10000, "outcome": "ok"}, {"path": "crowd.initial_users", "value": 1.0, "outcome": "ok"}]}

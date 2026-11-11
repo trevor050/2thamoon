@@ -1,0 +1,36 @@
+[
+  {
+    "signature": [
+      "ConservationError",
+      "ledger drift"
+    ],
+    "flat": {
+      "run.days": 970,
+      "crowd.churn_fear_mult": 50.0,
+      "supply.vesting_cliff_days": 36.30316241351952,
+      "crowd.panic_threshold": 1.0,
+      "crowd.churn_per_year": 20.0,
+      "crowd.bass_q": 20.0,
+      "crowd.initial_users": 694665.1640742618,
+      "liquidity.protocol_owned_share": 1.0,
+      "market.bear_adoption": 10.0,
+      "traders.noise_intensity": 0.5209548176788671,
+      "crowd.ticket_usd": 1000000.0,
+      "supply.total_supply": 1650847212.668844,
+      "market.bull_ticket": 4.884375487529795,
+      "crowd.fear_sensitivity": 0.0
+    }
+  },
+  {
+    "signature": [
+      "ZeroDivisionError",
+      "division by zero"
+    ],
+    "flat": {
+      "run.mode": "stablecoin",
+      "stable.collateral_ratio": 0.1795372879407694,
+      "stable.redeem_fee": 0.0812446960837556,
+      "run.days": 110
+    }
+  }
+]

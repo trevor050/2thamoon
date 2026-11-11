@@ -1,0 +1,47 @@
+{
+  "units": "ms",
+  "method": "scripts/bench.py: median of 7 preset runs; median of 3 batches for the 30-seed check",
+  "platform": "2020 M1 MacBook Air, macOS, Python 3.14.7, NumPy 2.4.2",
+  "rows": [
+    {
+      "scenario": "sandbox",
+      "before": 11.4,
+      "after": 15.5
+    },
+    {
+      "scenario": "pump_and_dump",
+      "before": 4.6,
+      "after": 5.9
+    },
+    {
+      "scenario": "whale_exit",
+      "before": 3.7,
+      "after": 4.8
+    },
+    {
+      "scenario": "death_spiral",
+      "before": 10.5,
+      "after": 14.8
+    },
+    {
+      "scenario": "peg_defense",
+      "before": 7.1,
+      "after": 11.1
+    },
+    {
+      "scenario": "gold_peg",
+      "before": 19.7,
+      "after": 31.3
+    },
+    {
+      "scenario": "unlock_cliff",
+      "before": 7.5,
+      "after": 10.2
+    },
+    {
+      "scenario": "30-seed check",
+      "before": 343.0,
+      "after": 480.0
+    }
+  ]
+}

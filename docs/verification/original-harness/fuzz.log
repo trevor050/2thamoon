@@ -1,0 +1,27 @@
+{"progress": 0, "failures": 0, "seconds": 3.375298023223877}
+{"progress": 200, "failures": 0, "seconds": 9.066720008850098}
+{"progress": 400, "failures": 0, "seconds": 14.35494613647461}
+{"progress": 600, "failures": 0, "seconds": 20.790361881256104}
+{"progress": 800, "failures": 0, "seconds": 26.984911918640137}
+{"progress": 1000, "failures": 0, "seconds": 33.59423112869263}
+{"progress": 1200, "failures": 0, "seconds": 40.188244104385376}
+{"progress": 1400, "failures": 0, "seconds": 45.902063846588135}
+{"progress": 1600, "failures": 0, "seconds": 51.047893047332764}
+{"progress": 1800, "failures": 0, "seconds": 56.24178409576416}
+{"progress": 2000, "failures": 0, "seconds": 62.50731301307678}
+{"progress": 2200, "failures": 0, "seconds": 67.27611804008484}
+{"progress": 2400, "failures": 0, "seconds": 74.45640087127686}
+{"progress": 2600, "failures": 0, "seconds": 79.68324613571167}
+{"progress": 2800, "failures": 0, "seconds": 84.97983813285828}
+{"progress": 3000, "failures": 0, "seconds": 90.1421890258789}
+{"progress": 3200, "failures": 0, "seconds": 96.18075919151306}
+{"progress": 3400, "failures": 0, "seconds": 101.8143150806427}
+{"progress": 3600, "failures": 0, "seconds": 108.62020421028137}
+{"progress": 3800, "failures": 0, "seconds": 114.98883891105652}
+RAW liquidity.pool_usd 0.0 ValueError pool reserves must be positive
+RAW liquidity.lp_fee 1.0 ValueError fee must be in [0, 1)
+RAW supply.transfer_tax 1.0 ok 730.5523474847267
+RAW run.days 0 ok 0.1
+RAW run.days 10000 ok 1.7177012007305075
+RAW crowd.initial_users 1.0 ok 0.18964101551759976
+{"runs": 4556, "failures": 0, "worst_error": 2.1167675179776582e-13, "seconds": 121.35210919380188, "signatures": {}}

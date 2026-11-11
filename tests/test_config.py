@@ -1,0 +1,72 @@
+import json
+
+import pytest
+
+from moonsim import SimConfig, from_dict, from_flat, to_dict, to_flat
+from moonsim.config import KNOBS, ManualOrder, coerce_value, override
+
+
+def test_every_knob_is_documented_and_default_in_range():
+    assert len(KNOBS) >= 100
+    for k in KNOBS:
+        assert k.label
+        if k.kind in ("float", "int"):
+            assert k.lo is not None and k.hi is not None, k.path
+            assert k.lo <= k.default <= k.hi, k.path
+        if k.kind == "choice":
+            assert k.default in k.choices
+
+
+def test_flat_round_trip():
+    cfg = override(SimConfig(), run__days=90, crowd__bass_q=2.5, run__mode="stablecoin")
+    assert from_flat(to_flat(cfg)) == cfg
+
+
+def test_json_round_trip_keeps_manual_orders():
+    cfg = SimConfig()
+    cfg = from_flat({"attacker.style": "manual"}, base=cfg)
+    from dataclasses import replace
+
+    cfg = replace(cfg, attacker=replace(cfg.attacker, manual_orders=(ManualOrder(day=5, days=2, side="buy", usd=1e4),)))
+    again = from_dict(json.loads(json.dumps(to_dict(cfg))))
+    assert again == cfg
+
+
+def test_unknown_keys():
+    with pytest.raises(KeyError):
+        from_flat({"crowd.not_a_knob": 1})
+    # Old exports with extra keys still load.
+    assert from_dict({"crowd": {"bass_q": 2.0, "legacy_field": 3}}).crowd.bass_q == 2.0
+
+
+def test_coerce_clamps_and_casts():
+    spec = next(k for k in KNOBS if k.path == "run.days")
+    assert coerce_value(spec, 10_000) == spec.hi
+    assert coerce_value(spec, "40.6") == 41
+    choice = next(k for k in KNOBS if k.path == "run.mode")
+    with pytest.raises(ValueError):
+        coerce_value(choice, "lol")
+
+
+@pytest.mark.parametrize("data", [None, 42, "bad", [1]])
+def test_import_rejects_non_object_json(data):
+    with pytest.raises(ValueError, match="object"):
+        from_dict(data)
+
+
+@pytest.mark.parametrize(
+    "order",
+    [
+        {"day": "bad"},
+        {"day": -1},
+        {"days": 0},
+        {"days": float("inf")},
+        {"side": "hold"},
+        {"usd": -1},
+        {"usd": float("nan")},
+        {"usd": float("inf")},
+    ],
+)
+def test_import_rejects_invalid_manual_orders(order):
+    with pytest.raises(ValueError, match="manual order"):
+        from_dict({"attacker": {"style": "manual", "manual_orders": [order]}})

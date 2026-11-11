@@ -1,12 +1,17 @@
-# Exclude everything by default
-*
-
-# But include these specific files
-!.gitignore
-!app.py
-!README.md
-
-# Make sure we don't track any directories
-**/__pycache__/
-**/.venv/
-**/.history/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+.DS_Store
+.streamlit/secrets.toml
+.venv*/
+web/src/
+.vercel

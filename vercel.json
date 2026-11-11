@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "",
+  "buildCommand": "rm -rf web/src && mkdir -p web/src && cp -R app.py moonsim moonsim_app web/src/ && find web/src -name __pycache__ -prune -exec rm -rf {} +",
+  "outputDirectory": "web"
+}
