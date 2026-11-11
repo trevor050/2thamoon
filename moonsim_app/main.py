@@ -387,7 +387,7 @@ def render_results(cfg: SimConfig, res: SimResult) -> None:
                     "minting have stopped permanently. Redemptions receive only their pro-rata available collateral."
                 )
             st.caption(
-                "Redemptions pay out of the dollar reserve first (at the collateral ratio), the rest in newly "
+                "Normally, redemptions pay from the dollar reserve at the collateral ratio, the rest in newly "
                 "minted governance tokens that arbitrageurs dump. Watch the supply line."
             )
             st.plotly_chart(charts.stablecoin(res), key="stable_chart", config={"displaylogo": False})
@@ -420,13 +420,15 @@ def render_results(cfg: SimConfig, res: SimResult) -> None:
                 f"Median end: {np.median(ends):.2f}x the start."
             )
     with tabs["Data"]:
+        if res.inapplicable_series:
+            st.caption("Stablecoin-only fields are inapplicable in token mode and omitted from the table and CSV.")
         frame = res.frame()
         st.dataframe(frame, height=320, hide_index=True)
         c1, c2 = st.columns(2)
         with c1:
             st.download_button(
                 "Download this run (CSV)",
-                frame.to_csv(index=False).encode(),
+                res.to_csv().encode(),
                 "2thamoon_run.csv",
                 "text/csv",
                 width="stretch",
@@ -455,7 +457,7 @@ def render_footer() -> None:
             "- **Stablecoin mode** adds mint/redeem arbitrage at the peg, a dollar reserve, and a governance "
             "token that is minted to pay redemptions the reserve cannot cover.\n"
             "- **Every step** the engine checks that tokens, dollars, governance tokens and LP shares add up. "
-            "Same seed and knobs give the same run.\n"
+            "Same seed, platform and Python/NumPy versions give the same run.\n"
             "- **Not modelled:** order books and multiple venues, leverage and shorting, MEV, gas, oracles with "
             "delay, real people. It is a toy for building intuition, not a forecast. Details in the "
             "[README](https://github.com/trevor050/2thamoon#how-the-sim-works)."

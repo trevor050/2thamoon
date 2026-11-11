@@ -1,0 +1,39 @@
+{
+  "runs": 4556,
+  "failures": 0,
+  "worst_error": 2.1167675179776582e-13,
+  "seconds": 121.27068745903671,
+  "legacy_inputs": true,
+  "raw_api_probes": [
+    {
+      "path": "liquidity.pool_usd",
+      "value": 0.0,
+      "outcome": "ValueError: pool reserves must be positive"
+    },
+    {
+      "path": "liquidity.lp_fee",
+      "value": 1.0,
+      "outcome": "ValueError: fee must be in [0, 1)"
+    },
+    {
+      "path": "supply.transfer_tax",
+      "value": 1.0,
+      "outcome": "ok"
+    },
+    {
+      "path": "run.days",
+      "value": 0,
+      "outcome": "ok"
+    },
+    {
+      "path": "run.days",
+      "value": 10000,
+      "outcome": "ok"
+    },
+    {
+      "path": "crowd.initial_users",
+      "value": 1.0,
+      "outcome": "ok"
+    }
+  ]
+}

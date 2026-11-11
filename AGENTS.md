@@ -11,19 +11,21 @@ Crypto market sandbox. Streamlit app on Streamlit Community Cloud (https://2tham
 - `scripts/` `audit_legacy.py` (reproduces README v1 numbers from commit 2e4c96a), `bench.py`, `screenshots.py`.
 
 ## Commands
-- `pip install -r requirements-dev.txt && pytest` (~8s, includes AppTest UI smoke tests).
+- `pip install -r requirements-dev.txt && pytest` (includes AppTest UI smoke tests).
 - `ruff check . && ruff format --check .` (CI enforces both).
 - `streamlit run app.py`; `?scenario=<preset key>` deep-links.
 - Screenshots: run app on :8599, `python scripts/screenshots.py http://localhost:8599` (needs playwright + chromium).
 
 ## Invariants / hazards
 - Never set price directly. All value moves via `Simulation.buy/sell`, pool LP ops, explicit mints (`_mint_tokens`,
-  `gov_minted`) or `ext_in/ext_out`. `check_conservation` + strict-mode property tests catch any leak.
+  `_gov_minted`) or `_ext_in/_ext_out/_external_spend`. `check_conservation` + strict-mode property tests catch any leak.
 - New knob: add with `knob(...)` (lo/hi/label required, default in range; `test_config` checks). Mode-specific knobs
   must be listed in `STABLE_ONLY`/`TOKEN_ONLY` in `moonsim_app/main.py` or they show in the wrong mode.
-- Presets are calibrated; scenario tests assert their story across seeds 0-4. Any engine behaviour change can break
+- Presets are calibrated; scenario tests assert their story across seeds 0-9. Any engine behaviour change can break
   them: rerun `pytest tests/test_scenarios.py` and retune presets, not the assertions.
 - `death_spiral` and `peg_defense` must differ only in `stable.reserve_ratio` and `stable.collateral_ratio` (tested).
+- `SimResult.inapplicable_series` lists the five all-NaN token-mode stablecoin fields; use `applicable_series`/`frame()`/`to_csv()` for data, never NaN equality. `run_many` rejects inapplicable series; peg chart rejects token mode. Other outputs must be finite.
+- Fuzz: `python3 scripts/fuzz.py --legacy --output docs/verification` replays tester 4556 inputs (exclude new promotion knob to preserve original RNG stream); default includes the knob. Pytest runs 300 short random configs plus 144 CR/fee/seed grid, original 31 failures and two minimized cases.
 - Streamlit renders `$...$` as LaTeX: wrap user-facing text containing dollars in `md()` in `main.py`.
 - Widget state for hidden (non-rendered) knobs is garbage-collected by Streamlit; canonical values live in
   `st.session_state.flat`, widgets sync via `on_knob`. Keep that pattern.

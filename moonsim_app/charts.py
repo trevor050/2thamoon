@@ -42,7 +42,8 @@ BASE_LAYOUT = dict(
 
 
 def _usd_tick(series: np.ndarray) -> str:
-    top = float(np.nanmax(np.abs(series))) if len(series) else 1.0
+    finite = series[np.isfinite(series)]
+    top = float(np.max(np.abs(finite))) if finite.size else 1.0
     if top < 0.01:
         return "$.2e"
     if top < 10:
@@ -135,7 +136,10 @@ def price_story(res: SimResult, events: Sequence[Event], log_scale: bool | None 
 
 def _tidy_log_axis(fig: go.Figure, values: np.ndarray, **kw) -> None:
     """One label per decade (or 1-2-5 for short ranges) instead of a tick on every digit."""
-    lo, hi = float(np.nanmin(values)), float(np.nanmax(values))
+    values = values[np.isfinite(values) & (values > 0)]
+    if not values.size:
+        return
+    lo, hi = float(np.min(values)), float(np.max(values))
     decades = np.log10(hi / lo) if lo > 0 else 0
     fig.update_yaxes(dtick=1 if decades > 2.5 else "D2", **kw)
 
@@ -290,6 +294,8 @@ def crowd(res: SimResult) -> go.Figure:
 
 
 def stablecoin(res: SimResult) -> go.Figure:
+    if "peg" in res.inapplicable_series:
+        raise ValueError("Peg mechanics are inapplicable in token mode")
     s = res.series
     day = s["day"]
     fig = make_subplots(
@@ -354,11 +360,11 @@ def stablecoin(res: SimResult) -> go.Figure:
     if res.protocol_failure_day is not None:
         fig.add_vline(x=res.protocol_failure_day, line_dash="dot", line_color=SECOND)
     gp = s["gov_price"]
-    if np.nanmax(gp) / max(np.nanmin(gp), 1e-300) > 20:
+    if np.max(gp) / max(np.min(gp), 1e-300) > 20:
         fig.update_yaxes(type="log", exponentformat="power", tickprefix="$", row=2, col=1)
         _tidy_log_axis(fig, gp, row=2, col=1)
     gs = s["gov_supply"]
-    if np.nanmax(gs) / max(np.nanmin(gs), 1e-300) > 20:
+    if np.max(gs) / max(np.min(gs), 1e-300) > 20:
         fig.update_yaxes(type="log", tickformat=".2~s", row=3, col=1)
         _tidy_log_axis(fig, gs, row=3, col=1)
     return fig

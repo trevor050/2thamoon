@@ -1,0 +1,8 @@
+{
+  "source": "/Users/trevorrosato/CodeProjects/portfolio-wave/_pc-evidence/web-b/2thamoon/fuzz.py",
+  "sha256": "ed32b1e03c21aa8a4d9a5f68d26b43dbb9a4c72b30141f34fab3bb3de45132c8",
+  "adaptations": [
+    "Redirect output into the assigned repository; evidence folder stays read-only.",
+    "Exclude only the new promotion-price knob to preserve the original 4556 inputs and RNG stream."
+  ]
+}

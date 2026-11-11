@@ -62,7 +62,12 @@ class RunConfig:
     )
     days: int = knob(365, 30, 1095, label="Days to simulate", step=5)
     seed: int = knob(
-        7, 0, 1_000_000, label="Random seed", step=1, help="Same seed + same knobs = the exact same run, every time."
+        7,
+        0,
+        1_000_000,
+        label="Random seed",
+        step=1,
+        help="Same seed and knobs on the same platform with the same Python/NumPy versions give an identical run.",
     )
 
 

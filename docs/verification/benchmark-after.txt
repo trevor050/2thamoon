@@ -1,0 +1,8 @@
+sandbox          365 days    15.5 ms
+pump_and_dump    150 days     5.9 ms
+whale_exit       120 days     4.8 ms
+death_spiral     120 days    14.8 ms
+peg_defense      120 days    11.1 ms
+gold_peg         365 days    31.3 ms
+unlock_cliff     240 days    10.2 ms
+luck check: 30 seeds x 365 days     480 ms

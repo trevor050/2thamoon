@@ -204,7 +204,7 @@ PRESETS: Tuple[Preset, ...] = (
             "run.days": 240,
             "run.seed": 2,
             "market.start_regime": "bull",
-            "market.bull_days": 400.0,
+            "market.bull_days": 600.0,
             "market.shock_per_year": 0.0,
             "supply.insiders_share": 0.3,
             "supply.holders_share": 0.25,

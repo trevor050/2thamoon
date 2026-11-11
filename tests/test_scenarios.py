@@ -10,7 +10,7 @@ import pytest
 from moonsim import run, story
 from moonsim.presets import PRESETS, get
 
-SEEDS = range(5)
+SEEDS = range(10)
 
 
 def runs(key):
@@ -116,3 +116,17 @@ def test_sandbox_is_a_mixed_bag():
     """The default world is not rigged: across seeds some runs end up and some end down."""
     ends = [run(get("sandbox").with_seed(seed)).series["price"][-1] / 0.1 for seed in range(12)]
     assert min(ends) < 0.8 and max(ends) > 1.2
+
+
+@pytest.mark.parametrize("preset", PRESETS, ids=lambda p: p.key)
+def test_all_presets_are_deterministic_and_conserve_over_ten_seeds(preset):
+    for seed in SEEDS:
+        a = run(preset.with_seed(seed), strict=True)
+        b = run(preset.with_seed(seed), strict=True)
+        assert a.max_conservation_error < 1e-9
+        assert a.inapplicable_series == b.inapplicable_series
+        for key in a.applicable_series:
+            assert np.array_equal(a.series[key], b.series[key]), (seed, key)
+        for key in a.inapplicable_series:
+            assert np.isnan(a.series[key]).all() and np.isnan(b.series[key]).all()
+        assert a.events == b.events

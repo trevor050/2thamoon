@@ -8,12 +8,14 @@ Design rules this file sticks to:
   nowhere: new tokens only come from explicit mints (emissions, stablecoin mints,
   governance-token mints on redemption) and dollars only enter or leave through
   newcomers, churners and explicit external promotion spend. :meth:`Simulation.check_conservation` proves it every step.
-* All randomness comes from one seeded ``numpy.random.Generator``, so a seed fully
-  determines a run.
+* All randomness comes from one seeded ``numpy.random.Generator``; seed and knobs
+  reproduce a run on the same platform and library versions.
 """
 
 from __future__ import annotations
 
+import csv
+import io
 import math
 from dataclasses import dataclass, replace
 from typing import Callable, Dict, List, Sequence, Tuple
@@ -43,6 +45,7 @@ CONSERVATION_TOL = 1e-9
 GOV_MIN_PRICE = 1e-12  # USD per governance token
 GOV_MIN_RESERVE = 1e-9  # either whole governance tokens or USD
 GOV_SUPPLY_CAP = 1e24  # reject a redemption that would issue beyond this supply
+STABLECOIN_SERIES = ("peg", "collateral_ratio", "backing_ratio", "gov_price", "gov_supply")
 
 
 class ConservationError(AssertionError):
@@ -108,6 +111,13 @@ class Event:
 
 @dataclass
 class SimResult:
+    """Daily results, including day zero.
+
+    In token mode STABLECOIN_SERIES are deliberately all NaN (not applicable).
+    All other outputs, and all stablecoin-mode series, must be finite. Consumers
+    should use applicable_series; raw series preserves the uniform engine schema.
+    """
+
     config: SimConfig
     series: Dict[str, np.ndarray]
     events: List[Event]
@@ -127,10 +137,28 @@ class SimResult:
         days = np.flatnonzero(self.series["protocol_failed"])
         return int(days[0]) if days.size else None
 
+    @property
+    def inapplicable_series(self) -> Tuple[str, ...]:
+        return STABLECOIN_SERIES if self.config.run.mode == "token" else ()
+
+    @property
+    def applicable_series(self) -> Dict[str, np.ndarray]:
+        return {k: v for k, v in self.series.items() if k not in self.inapplicable_series}
+
     def frame(self):
+        """Applicable columns only; raw inapplicable NaNs are not data/export fields."""
         import pandas as pd  # local import: the engine itself only needs numpy
 
-        return pd.DataFrame(self.series)
+        return pd.DataFrame(self.applicable_series)
+
+    def to_csv(self) -> str:
+        """Export applicable columns without requiring pandas or serializing NaN sentinels."""
+        columns = self.applicable_series
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(columns)
+        writer.writerows(zip(*columns.values()))
+        return output.getvalue()
 
     def summary(self) -> Dict[str, float | int | None]:
         s = self.series
@@ -1494,6 +1522,8 @@ def run(cfg: SimConfig, strict: bool = False) -> SimResult:
 
 def run_many(cfg: SimConfig, seeds: Sequence[int], series: str = "price") -> np.ndarray:
     """Run the same config under several seeds; returns an array of shape (len(seeds), days + 1)."""
+    if cfg.run.mode == "token" and series in STABLECOIN_SERIES:
+        raise ValueError(f"{series!r} is inapplicable in token mode")
     out = []
     for seed in seeds:
         res = run(replace(cfg, run=replace(cfg.run, seed=int(seed))))

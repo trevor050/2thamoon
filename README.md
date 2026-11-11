@@ -51,6 +51,8 @@ each one loads with one click (or a link). they are just presets of the normal k
 | [**Vesting cliff dump**](https://2thamoon.streamlit.app/?scenario=unlock_cliff) | A hyped token rides a bull market while 30% of supply sits locked for the team and early investors. Watch the day-120 cliff hand insiders a quarter of their bag at once, and how steady insider selling turns a chart that only went up into a slow bleed. |
 | [**Fair launch sandbox**](https://2thamoon.streamlit.app/?scenario=sandbox) | A small token launches into a $250k pool with real holders, whales, insiders on a vesting schedule, and a market that drifts between bull and bear. Watch who is buying and selling each day, then change the seed: the same rules can moon or die on luck alone. |
 
+the unlock-cliff preset uses a 600-day average bull regime (formerly 400) so the expanded seeds 0–9 checks keep the run-up visible before the cliff, including seed 6; no engine rules or scenario assertions were weakened.
+
 the two stablecoin scenarios are identical except for two knobs (reserve ratio and collateral ratio), and a test enforces that. same coin, same attack, opposite endings. thats the whole lesson of terra in one toggle. fun side quest: give the death spiral an $8M defence fund instead of $3M and it survives roughly a third of seeds.
 
 ![Death spiral: the coin depegs, a bounce from the raider buying back, then collapse](docs/screenshots/death_spiral.png)
@@ -100,9 +102,11 @@ traders set slippage limits (calm people split orders, panicking people eat a lo
 
 **regimes, hype, shocks.** the market drifts between bull, sideways and bear (a markov chain with average durations you set). each regime scales adoption, newcomer budgets, mood, churn and how nervous LPs are. hype waves and macro shocks arrive at random (Poisson), hype decays with a half-life, shocks hit everyones fear.
 
-**conservation and determinism.** every step the engine checks four ledgers: tokens (all wallets + pool + locked + burned = initial + minted), dollars (all wallets + pools = initial + newcomer cash in - churner cash out - external promotion spend), governance tokens, and LP shares. cash wallets and cumulative transfer/mint/burn totals retain low bits with constant-space Neumaier summation; conservation sums signed components together with `math.fsum` before rounding, including the token, governance and LP ledgers. it never subtracts two rounded turnover totals or adds a balancing account. the property tests throw dozens of random knob combinations (both modes, any values in range) at it on every test run, in strict mode, where any drift past 1e-9 or any negative balance raises. one seeded generator drives all randomness, so the same seed and knobs reproduce a run in the same environment. Windows, Linux and macOS can differ at floating-point precision; results are not bit-identical across platforms.
+**conservation and determinism.** every step the engine checks four ledgers: tokens (all wallets + pool + locked + burned = initial + minted), dollars (all wallets + pools = initial + newcomer cash in - churner cash out - external promotion spend), governance tokens, and LP shares. cash wallets and cumulative transfer/mint/burn totals retain low bits with constant-space Neumaier summation; conservation sums signed components together with `math.fsum` before rounding, including the token, governance and LP ledgers. it never subtracts two rounded turnover totals or adds a balancing account. the property tests throw 300 random knob combinations (both modes, any values in range) at it on every test run, in strict mode, where any drift past 1e-9 or any negative balance raises. one seeded generator drives all randomness, so the same seed and knobs, on the same platform with the same Python and NumPy versions, give identical results. Windows, Linux and macOS can differ at floating-point precision; results are not bit-identical across platforms.
 
-**speed.** a 365-day run takes roughly 10 to 20 ms on my 2020 M1 MacBook Air, and the 30-seed luck check about a third of a second (`python scripts/bench.py`).
+**speed.** benchmarks and before/after measurements are recorded in [the correctness verification notes](docs/verification/README.md); reproduce them with `python3 scripts/bench.py`.
+
+**output contract.** raw `result.series` has a uniform schema. in token mode, exactly `peg`, `collateral_ratio`, `backing_ratio`, `gov_price` and `gov_supply` are entirely NaN because they do not apply; `result.inapplicable_series` lists them. in stablecoin mode that list is empty and every series is finite, including after failure. `result.applicable_series`, `result.frame()` and `result.to_csv()` exclude inapplicable fields; the Data tab explains the omission. use these views for calculations, charts and exports, and use `isnan` for sentinels rather than equality. `run_many` rejects requests for an inapplicable comparison series. `protocol_failed` is always boolean (false in token mode); inactive reserve/redemption flows remain real zeros.
 
 ## what it does not model
 
@@ -110,9 +114,9 @@ so you dont take it too seriously:
 
 - one pool on one venue. no order books, no CEXs, no cross-venue arbitrage for normal tokens
 - no leverage, shorting, lending, liquidations or perps. raiders here cant profit from a short elsewhere, so a bear raid usually loses them money
-- no MEV, gas, block-level ordering, or oracle delays. the stablecoin uses the governance pool's spot price
+- no MEV, gas, block-level ordering, or oracle delays. the stablecoin uses the governance pool's spot price; governance failure cutoffs are an explicit terminal policy, not a claim about a real protocol's legal insolvency or recovery
 - agents are aggregated cohorts with simple rules, not people. "conviction" and "fear" are modelling devices, not measured psychology
-- the default numbers are picked to make plausible, explainable stories, not fitted to any real token's history
+- the default numbers are picked to make plausible, explainable stories, not fitted to any real token's history. paid promotion is a simple cash-for-hype service, not an ad auction or an empirical estimate of marketing effectiveness
 
 it is a toy for building intuition about mechanisms (slippage, reflexivity, bank runs, unlock pressure). it does not predict anything and it is definitely not financial advice.
 

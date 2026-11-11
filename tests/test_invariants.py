@@ -55,8 +55,11 @@ def test_same_seed_same_run(flat, seed):
     flat = {**flat, "run.seed": seed}
     a = run(from_flat(flat))
     b = run(from_flat(flat))
-    for name in a.series:
-        assert np.array_equal(a.series[name], b.series[name], equal_nan=True), name
+    assert a.inapplicable_series == b.inapplicable_series
+    for name in a.applicable_series:
+        assert np.array_equal(a.series[name], b.series[name]), name
+    for name in a.inapplicable_series:
+        assert np.isnan(a.series[name]).all() and np.isnan(b.series[name]).all()
     assert a.events == b.events
 
 

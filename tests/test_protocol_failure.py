@@ -7,10 +7,12 @@ from moonsim import from_flat, run, story
 from moonsim.engine import Simulation
 
 
-@pytest.mark.parametrize("cr,fee", [(0.1795372879407694, 0.0812446960837556), (0.05, 0.1)])
-def test_governance_collapse_keeps_running(cr, fee):
+@pytest.mark.parametrize("cr,fee,days", [(0.1795372879407694, 0.0812446960837556, 110), (0.05, 0.1, 120)])
+def test_governance_collapse_keeps_running(cr, fee, days):
     res = run(
-        from_flat({"run.mode": "stablecoin", "run.days": 120, "stable.collateral_ratio": cr, "stable.redeem_fee": fee}),
+        from_flat(
+            {"run.mode": "stablecoin", "run.days": days, "stable.collateral_ratio": cr, "stable.redeem_fee": fee}
+        ),
         strict=True,
     )
     failed = res.series["protocol_failed"]
@@ -83,3 +85,31 @@ def test_all_26_reported_governance_crashes_are_regressions():
         res = run(from_flat(case["flat"]), strict=True)
         assert res.protocol_failure_day is not None, case["label"]
         assert res.max_conservation_error < 1e-9, case["label"]
+
+
+def test_collateral_only_arbitrage_settles_after_failure(monkeypatch):
+    sim = Simulation(
+        from_flat(
+            {
+                "run.mode": "stablecoin",
+                "stable.collateral_ratio": 0.3,
+                "stable.reserve_ratio": 0.001,
+                "stable.max_redeem_per_day": 0.5,
+            }
+        ),
+        strict=True,
+    )
+    with monkeypatch.context() as patch:
+        patch.setitem(sim._check_governance.__func__.__globals__, "GOV_SUPPLY_CAP", 1.0)
+        sim._check_governance(1)
+    for wallet in sim.wallets:
+        sim.sell(wallet, wallet.token, wallet.name if wallet.name in sim.flows else "whales")
+    sim.redeem_cap_left = 0.5 * sim.token0
+    cash, reserve = sim.arbs.usd, sim.reserve.usd
+    sim._arbitrage(2)
+    assert sim.redeemed_total > 0
+    assert sim.arbs.usd > cash
+    assert sim.reserve.usd < reserve
+    assert sim.gov_minted == 0.0 and sim.arbs.gov == 0.0
+    assert sim.arbs.token < 1e-9
+    sim.check_conservation()
