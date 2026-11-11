@@ -28,7 +28,7 @@ Crypto market sandbox. Streamlit app on Streamlit Community Cloud (https://2tham
 - Widget state for hidden (non-rendered) knobs is garbage-collected by Streamlit; canonical values live in
   `st.session_state.flat`, widgets sync via `on_knob`. Keep that pattern.
 - Streamlit dev server does not hot-reload `moonsim` reliably; restart it after engine edits.
-- Attacker PnL = cash + exit value of bag now, minus the same on day 0 (not paper value).
+- Attacker PnL = cash + exit value of bag now, minus the same on day 0 (not paper value). Paid promotion debits cash once at pump start, capped by cash; `promo_usd_per_hype` defaults to $1,000, range $1-$1M. `_external_spend` retains the dollars outside the economy and participates in conservation; `external_spend_usd` exposes cumulative spend. Include spend in attacker cost; never deduct it twice from PnL.
 
 ## PC test findings (2026-11-10)
 - Native Python 3.10.0 breaks current pytest/Hypothesis via CPython #88815; use a patched Python (3.13 tested).

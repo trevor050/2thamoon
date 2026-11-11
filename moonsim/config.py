@@ -543,7 +543,19 @@ class AttackerConfig:
         20.0,
         label="Paid hype at pump start",
         step=0.25,
-        help="Shill campaign. Adds this much to the hype index when the pump starts.",
+        help="Requested shill campaign. Hype is scaled down to what the attacker's remaining cash can buy.",
+    )
+    promo_usd_per_hype: float = knob(
+        1_000.0,
+        1.0,
+        1_000_000.0,
+        label="Promotion cost (USD per hype unit)",
+        step=100.0,
+        fmt="%.0f",
+        log=True,
+        advanced=True,
+        help="Paid once at pump start from attacker cash. Dollars leave the economy as external promotion spend "
+        "and reduce attacker profit; zero cash buys zero hype.",
     )
     dump_multiple: float = knob(2.5, 1.0, 100.0, label="Dump once price is this x their cost", step=0.25, advanced=True)
     dump_days: int = knob(

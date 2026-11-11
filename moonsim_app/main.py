@@ -67,6 +67,7 @@ TOKEN_ONLY = {
     "attacker.accumulate_share",
     "attacker.pump_days",
     "attacker.promo_hype",
+    "attacker.promo_usd_per_hype",
     "attacker.dump_multiple",
     "attacker.dump_days",
     "attacker.dump_slippage",
@@ -402,7 +403,9 @@ def render_results(cfg: SimConfig, res: SimResult) -> None:
         st.plotly_chart(charts.crowd(res), key="crowd_chart", config={"displaylogo": False})
     if "Attacker" in tabs:
         with tabs["Attacker"]:
-            st.caption("Valued at what the bag would actually sell for, not at the chart price.")
+            st.caption(
+                "Valued at what the bag would actually sell for, including promotion costs paid from attacker cash."
+            )
             st.plotly_chart(charts.attacker(res), key="attacker_chart", config={"displaylogo": False})
     with tabs["Was it luck?"]:
         st.caption(f"Runs these exact knobs under {LUCK_SEEDS} other seeds and shows the spread.")

@@ -7,7 +7,7 @@ Design rules this file sticks to:
   balances, and moves tokens and dollars between named wallets. Nothing appears from
   nowhere: new tokens only come from explicit mints (emissions, stablecoin mints,
   governance-token mints on redemption) and dollars only enter or leave through
-  newcomers and churners. :meth:`Simulation.check_conservation` proves it every step.
+  newcomers, churners and explicit external promotion spend. :meth:`Simulation.check_conservation` proves it every step.
 * All randomness comes from one seeded ``numpy.random.Generator``, so a seed fully
   determines a run.
 """
@@ -157,6 +157,7 @@ class SimResult:
             "attacker_pnl": float(s["attacker_pnl"][-1]),
             "volume_usd": float(np.sum(s["volume_usd"])),
             "protocol_failure_day": self.protocol_failure_day,
+            "external_spend_usd": float(s["external_spend_usd"][-1]),
         }
 
 
@@ -191,6 +192,7 @@ SERIES_NAMES: Tuple[str, ...] = (
     "volume_usd",
     "attacker_value",
     "attacker_pnl",
+    "external_spend_usd",
     "attacker_token",
     "whale_token",
     "whale_usd",
@@ -382,6 +384,7 @@ class Simulation:
         self.gov0 = self._gov_total()
         self._ext_in = _RunningSum()
         self._ext_out = _RunningSum()
+        self._external_spend = _RunningSum()
 
         # Baseline for attacker PnL: what they could have walked away with on day 0.
         self.attacker_start_value = self.attacker.usd + self.pool.quote_sell(self.attacker.token * (1.0 - self.tax))
@@ -454,6 +457,10 @@ class Simulation:
     def ext_out(self) -> float:
         return self._ext_out.value
 
+    @property
+    def external_spend(self) -> float:
+        return self._external_spend.value
+
     def _token_total(self) -> float:
         return math.fsum([w.token for w in self.wallets] + [self.pool.token, self.locked, self.burned])
 
@@ -486,6 +493,7 @@ class Simulation:
                 self.gov_burned,
                 self.ext_in,
                 self.ext_out,
+                self.external_spend,
             ]
             if self.gov_pool is not None:
                 balances += [self.gov_pool.token, self.gov_pool.usd, self.gov_pool.shares]
@@ -497,6 +505,8 @@ class Simulation:
             self._ext_in.low,
             -self._ext_out.high,
             -self._ext_out.low,
+            -self._external_spend.high,
+            -self._external_spend.low,
         ]
         gov_expected = [self.gov0, self._gov_minted.high, self._gov_minted.low]
         token = [w.token for w in self.wallets] + [self.pool.token, self.locked, self._burned.high, self._burned.low]
@@ -941,12 +951,17 @@ class Simulation:
         a = self.cfg.attacker
         self.attacker_phase = "pump"
         self.attacker_phase_day = day
-        self.hype += a.promo_hype
+        spend = min(a.promo_hype * a.promo_usd_per_hype, self.attacker.usd)
+        hype = spend / a.promo_usd_per_hype
+        self.attacker.add_usd(-spend)
+        self._external_spend.add(spend)
+        self.attacker_cost += spend
+        self.hype += hype
         self._event(
             day,
             "attack_pump",
             "Pump starts",
-            f"Attacker buys hard and pays for a shill campaign (+{a.promo_hype:.1f} hype).",
+            f"Attacker spends {_fmt_usd(spend)} on promotion (+{hype:.1f} hype) and buys into the pump.",
             3,
         )
 
@@ -1294,6 +1309,7 @@ class Simulation:
         value = self.attacker.usd + self.pool.quote_sell(self.attacker.token * (1.0 - self.tax))
         s["attacker_value"][i] = value
         s["attacker_pnl"][i] = value - self.attacker_start_value
+        s["external_spend_usd"][i] = self.external_spend
         s["attacker_token"][i] = self.attacker.token
         s["whale_token"][i] = sum(w.token for w in self.whales)
         s["whale_usd"][i] = sum(w.usd for w in self.whales)

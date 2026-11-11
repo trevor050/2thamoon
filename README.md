@@ -2,7 +2,7 @@
 
 **Try it:** **https://2thamoon.streamlit.app/**
 
-Simulate the mess. 2thamoon lets you crank the knobs on hype, liquidity, whales, attackers, market regimes and treasury policy to watch a token rip, stall, or implode. There are 138 knobs, and every one of them is wired to something real now.
+Simulate the mess. 2thamoon lets you crank the knobs on hype, liquidity, whales, attackers, market regimes and treasury policy to watch a token rip, stall, or implode. There are 139 knobs, and every one of them is wired to something real now.
 
 ![The pump and dump scenario: annotated price chart, what-happened list and key numbers](docs/screenshots/pump_and_dump.png)
 
@@ -96,9 +96,11 @@ traders set slippage limits (calm people split orders, panicking people eat a lo
 
 **supply and treasury.** emissions or staking yield are minted to holders (with optional halvings and a hard cap), a transfer tax can be split between burning and the treasury, vesting unlocks move locked tokens to insiders.
 
+**paid promotion.** `attacker.promo_usd_per_hype` prices the requested shill campaign in dollars per hype unit (default $1,000, range $1 to $1M). it is paid once at pump start from remaining attacker cash, so an empty wallet buys zero hype and a short budget buys a smaller campaign. the dollars leave through an explicit external-spend account (`external_spend_usd`, cumulative), included in the dollar ledger. the cost reduces the attacker's cash, profit and cost-based exit trigger. the pump-and-dump preset still uses six hype units, now costing $6,000; none of its preset values needed changing.
+
 **regimes, hype, shocks.** the market drifts between bull, sideways and bear (a markov chain with average durations you set). each regime scales adoption, newcomer budgets, mood, churn and how nervous LPs are. hype waves and macro shocks arrive at random (Poisson), hype decays with a half-life, shocks hit everyones fear.
 
-**conservation and determinism.** every step the engine checks four ledgers: tokens (all wallets + pool + locked + burned = initial + minted), dollars (all wallets + pools = initial + newcomer cash in - churner cash out), governance tokens, and LP shares. cash wallets and cumulative transfer/mint/burn totals retain low bits with constant-space Neumaier summation; conservation sums signed components together with `math.fsum` before rounding, including the token, governance and LP ledgers. it never subtracts two rounded turnover totals or adds a balancing account. the property tests throw dozens of random knob combinations (both modes, any values in range) at it on every test run, in strict mode, where any drift past 1e-9 or any negative balance raises. one seeded generator drives all randomness, so the same seed and knobs reproduce a run in the same environment. Windows, Linux and macOS can differ at floating-point precision; results are not bit-identical across platforms.
+**conservation and determinism.** every step the engine checks four ledgers: tokens (all wallets + pool + locked + burned = initial + minted), dollars (all wallets + pools = initial + newcomer cash in - churner cash out - external promotion spend), governance tokens, and LP shares. cash wallets and cumulative transfer/mint/burn totals retain low bits with constant-space Neumaier summation; conservation sums signed components together with `math.fsum` before rounding, including the token, governance and LP ledgers. it never subtracts two rounded turnover totals or adds a balancing account. the property tests throw dozens of random knob combinations (both modes, any values in range) at it on every test run, in strict mode, where any drift past 1e-9 or any negative balance raises. one seeded generator drives all randomness, so the same seed and knobs reproduce a run in the same environment. Windows, Linux and macOS can differ at floating-point precision; results are not bit-identical across platforms.
 
 **speed.** a 365-day run takes roughly 10 to 20 ms on my 2020 M1 MacBook Air, and the 30-seed luck check about a third of a second (`python scripts/bench.py`).
 
